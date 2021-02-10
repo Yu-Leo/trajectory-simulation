@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter.ttk import Combobox
 
+import config
 import constants as const
 import text
 from windowsParameters import DrawingFieldParams, SizeParams
@@ -36,7 +37,7 @@ class Menu:
         self.__parameters = SizeParams(None, None, padx=10, pady=10)
 
         self.__cast_type = ThrowType(self.__object)
-        self.__cast_params = ThrowParams(self.__object)
+        self.__cast_params = ThrowParams(self.__object, config.trow_type)
         self.__buttons = Buttons(self.__object)
 
     def draw(self):
@@ -53,23 +54,39 @@ class ThrowType:
     """Class of widget, which chose the throw type"""
 
     def __init__(self, window):
-        self.__label = tk.Label(window, text=text.throw_type_title, font="Arial 12")
-        self.__menu = Combobox(window, values=text.throw_types, state="readonly", width=22)
-        self.__menu.current(const.DEFAULT_THROW_TYPE)
+        self.__object = tk.Frame(window)
+        self.__label = tk.Label(self.__object, text=text.throw_type_title, font="Arial 12")
+        self.__menu = Combobox(self.__object, values=text.throw_types, state="readonly", width=22)
+        self.__menu.current(config.trow_type)
 
     def draw(self):
         self.__label.pack()
         self.__menu.pack()
+        self.__object.pack(pady=20)
 
 
 class ThrowParams:
     """Class of widgets, which set throw parameters"""
 
-    def __init__(self, window):
-        pass
+    def __init__(self, window, throw_type):
+        self.__object = tk.Frame(window)
+        self.__v0 = ParamRow(self.__object, "V0")
+        need_alpha = throw_type == const.TrowType.ALPHA
+        need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
+        self.__alpha = ParamRow(self.__object, "a", but=True) if need_alpha else None
+        self.__time = ParamRow(self.__object, "T", but=True)
+        self.__height = ParamRow(self.__object, "H", but=True)
+        self.__distance = ParamRow(self.__object, "L", but=True) if need_distance else None
 
     def draw(self):
-        pass
+        self.__v0.draw(0)
+        if self.__alpha is not None:
+            self.__alpha.draw(1)
+        self.__time.draw(2)
+        self.__height.draw(3)
+        if self.__distance is not None:
+            self.__distance.draw(4)
+        self.__object.pack()
 
 
 class Buttons:
@@ -80,3 +97,19 @@ class Buttons:
 
     def draw(self):
         pass
+
+
+class ParamRow:
+    def __init__(self, window, name, but=False):
+        # self.__object = tk.Frame(window)
+        self._label = tk.Label(window, text=name, font="Arial 12")
+        self._entry = tk.Entry(window)
+        button = tk.Button(window, text="calc")
+        self._button = (button if but else None)
+
+    def draw(self, row):
+        self._label.grid(column=0, row=row, padx=(0, 5), pady=5)
+        self._entry.grid(column=1, row=row, padx=(0, 5), pady=5)
+        if self._button is not None:
+            self._button.grid(column=2, row=row, pady=5)
+        # self.__object.pack(pady=5, anchor=tk.W)
