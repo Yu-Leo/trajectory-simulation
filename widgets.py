@@ -3,6 +3,9 @@
 import tkinter as tk
 from tkinter.ttk import Combobox
 
+from PIL import Image as PilImage
+from PIL import ImageTk
+
 import config
 import constants as const
 import style
@@ -35,7 +38,7 @@ class Menu:
 
     def __init__(self, window):
         self.__object = tk.Frame(window)  # Frame for all menu
-        self.__parameters = SizeParams(None, None, padx=10, pady=10)
+        self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
 
         self.__throw_type = ThrowType(self.__object, change_func=self.change_throw_params_list)
         self.__throw_params = ThrowParams(self.__object, config.trow_type)
@@ -68,9 +71,9 @@ class ThrowType:
         self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
 
     def draw(self):
-        self.__label.pack()
+        self.__label.pack(pady=5)
         self.__menu.pack()
-        self.__object.pack(side=tk.TOP, anchor=tk.N, pady=20)
+        self.__object.pack(side=tk.TOP, anchor=tk.N, pady=15)
 
 
 class ThrowParams:
@@ -96,7 +99,7 @@ class ThrowParams:
         if self.__distance is not None:
             self.__distance.draw(4)
         self.__button.grid(column=0, row=5, columnspan=3, pady=(5, 0))
-        self.__object.pack(pady=(0, 20))
+        self.__object.pack()
 
     def hide(self):
         self.__v0.hide()
@@ -129,21 +132,33 @@ class Buttons:
 class ParamRow:
     """Class of widgets of throw params"""
 
+    @staticmethod
+    def __get_image():
+        try:
+            image = PilImage.open(f"img/calc_icon32.ico")
+            image = image.resize((18, 18), PilImage.ANTIALIAS)
+            return ImageTk.PhotoImage(image)
+        except FileNotFoundError:
+            return None
+
     def __init__(self, window, name, but=False):
         """
         :param name: text for label (title)
         :param but: create button or not
         """
-        self._label = tk.Label(window, text=name, font="Arial 12")
-        self._entry = tk.Entry(window)
-        button = tk.Button(window, text="calc")
+        self._label = tk.Label(window, text=name, font=(style.font_name, 12))
+        self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
+        calc_image = ParamRow.__get_image()
+        button = tk.Button(window, image=calc_image)
+        button.image = calc_image
+
         self._button = (button if but else None)
 
     def draw(self, row):
-        self._label.grid(column=0, row=row, padx=(0, 5), pady=5)
-        self._entry.grid(column=1, row=row, padx=(0, 5), pady=5)
+        self._label.grid(column=0, row=row, padx=(0, 5), pady=6)
+        self._entry.grid(column=1, row=row, padx=(0, 5), pady=6)
         if self._button is not None:
-            self._button.grid(column=2, row=row, pady=5)
+            self._button.grid(column=2, row=row, pady=(0, 6), padx=(5, 0))
 
     def hide(self):
         self._label.grid_remove()
