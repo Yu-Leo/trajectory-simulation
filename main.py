@@ -6,29 +6,29 @@ from widgets import DrawingField, Menu
 from windowsParameters import WindowParams
 
 
-class MainWindow:
+class MainWindow(tk.Tk):
     """Application's main window"""
 
     def __init__(self):
-        self.__root = tk.Tk()
-        self.__parameters = WindowParams(title="Abandoned body's flight path simulation",
-                                         width=740, height=450)
-        self.__root.title(self.__parameters.title)
-        self.__root.geometry(self.__parameters.geometry())
-        self.__root.resizable(*self.__parameters.resizable)
+        super().__init__()
+        parameters = WindowParams(title="Abandoned body's trajectory simulation",
+                                  width=740, height=450)
+        self.title(parameters.title)
+        self.geometry(parameters.geometry())
+        self.resizable(*parameters.resizable)
         try:
-            self.__root.iconbitmap(self.__parameters.ico_path)
+            self.iconbitmap(parameters.ico_path)
         except tk.TclError:  # Icon display error
             pass  # Default Tkinter's icon
 
-        self.__drawing_field = DrawingField(self.__root)
-        self.__settings = Menu(self.__root)
+        self.__drawing_field = DrawingField(self)
+        self.__settings = Menu(self)
 
     def run(self):
         """Launching the app"""
         self.__drawing_field.draw()
         self.__settings.draw()
-        self.__root.mainloop()
+        self.mainloop()
 
 
 window = MainWindow()

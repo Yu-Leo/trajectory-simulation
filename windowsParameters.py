@@ -11,6 +11,8 @@ class SizeParams:
 
 
 class WindowParams(SizeParams):
+    """Class of parameters for window"""
+
     def __init__(self, title="", width=None, height=None, padx=None, pady=None):
         self.title = title
         super().__init__(width, height, padx, pady)
@@ -19,10 +21,8 @@ class WindowParams(SizeParams):
 
     def geometry(self):
         """Geometry by Tkinter's standard"""
-        if self.width is None and self.height is None \
-                and self.padx is None and self.pady is None:
+        if (self.width, self.height, self.padx, self.pady) == [None] * 4:
             return ""
-
         if self.width is None or self.height is None:
             return f"+{self.padx}+{self.pady}"
         if self.padx is None or self.pady is None:
@@ -31,6 +31,8 @@ class WindowParams(SizeParams):
 
 
 class DrawingFieldParams(SizeParams):
+    """Class of parameters for drawing field"""
+
     def __init__(self, bg="", width=None, height=None, padx=None, pady=None):
         self.bg = bg
         super().__init__(width, height, padx, pady)

@@ -13,7 +13,7 @@ import text
 from windowsParameters import DrawingFieldParams, SizeParams
 
 
-class DrawingField:
+class DrawingField(tk.Canvas):
     """Field for simulation"""
 
     def __init__(self, window):
@@ -22,73 +22,72 @@ class DrawingField:
                                                height=430,
                                                padx=10,
                                                pady=10)
-
-        self.__object = tk.Canvas(window, bg=self.__parameters.bg,
-                                  width=self.__parameters.width,
-                                  height=self.__parameters.height)
+        super().__init__(window, bg=self.__parameters.bg,
+                         width=self.__parameters.width,
+                         height=self.__parameters.height)
 
     def draw(self):
-        self.__object.pack(side=tk.LEFT,
-                           padx=self.__parameters.padx,
-                           pady=self.__parameters.pady)
+        self.pack(side=tk.LEFT,
+                  padx=self.__parameters.padx,
+                  pady=self.__parameters.pady)
 
 
-class Menu:
+class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
     def __init__(self, window):
-        self.__object = tk.Frame(window)  # Frame for all menu
+        super().__init__(window)
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
 
-        self.__throw_type = ThrowType(self.__object, change_func=self.change_throw_params_list)
-        self.__throw_params = ThrowParams(self.__object, config.trow_type)
-        self.__buttons = Buttons(self.__object)
+        self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
+        self.__throw_params = ThrowParams(self, config.trow_type)
+        self.__buttons = Buttons(self)
 
     def draw(self):
         self.__throw_type.draw()
         self.__throw_params.draw()
         self.__buttons.draw()
 
-        self.__object.pack(side=tk.RIGHT,
-                           padx=self.__parameters.padx,
-                           pady=self.__parameters.pady,
-                           fill=tk.Y)
+        self.pack(side=tk.RIGHT,
+                  padx=self.__parameters.padx,
+                  pady=self.__parameters.pady,
+                  fill=tk.Y)
 
     def change_throw_params_list(self, throw_type):
         self.__throw_params.hide()
-        self.__throw_params = ThrowParams(self.__object, throw_type)
+        self.__throw_params = ThrowParams(self, throw_type)
         self.__throw_params.draw()
 
 
-class ThrowType:
+class ThrowType(tk.Frame):
     """Class of widget, which chose the throw type"""
 
     def __init__(self, window, change_func):
-        self.__object = tk.Frame(window)
-        self.__label = tk.Label(self.__object, text=text.throw_type_title, font=(style.font_name, 12))
-        self.__menu = Combobox(self.__object, values=text.throw_types, state="readonly", width=22)
+        super().__init__(window)
+        self.__label = tk.Label(self, text=text.throw_type_title, font=(style.font_name, 12))
+        self.__menu = Combobox(self, values=text.throw_types, state="readonly", width=22)
         self.__menu.current(config.trow_type)  # Default value
         self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
 
     def draw(self):
         self.__label.pack(pady=5)
         self.__menu.pack()
-        self.__object.pack(side=tk.TOP, anchor=tk.N, pady=15)
+        self.pack(side=tk.TOP, anchor=tk.N, pady=15)
 
 
-class ThrowParams:
+class ThrowParams(tk.Frame):
     """Class of widgets, which set throw parameters"""
 
     def __init__(self, window, throw_type):
-        self.__object = tk.Frame(window)  # Frame for params
-        self.__v0 = ParamRow(self.__object, "V0")
+        super().__init__(window)
+        self.__v0 = ParamRow(self, "V0")
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self.__object, "a", but=True) if need_alpha else None
-        self.__time = ParamRow(self.__object, "T", but=True)
-        self.__height = ParamRow(self.__object, "H", but=True)
-        self.__distance = ParamRow(self.__object, "L", but=True) if need_distance else None
-        self.__button = tk.Button(self.__object, text=text.read_from_file, font=(style.font_name, 10), width=18)
+        self.__alpha = ParamRow(self, "a", but=True) if need_alpha else None
+        self.__time = ParamRow(self, "T", but=True)
+        self.__height = ParamRow(self, "H", but=True)
+        self.__distance = ParamRow(self, "L", but=True) if need_distance else None
+        self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
     def draw(self):
         self.__v0.draw(0)
@@ -99,7 +98,7 @@ class ThrowParams:
         if self.__distance is not None:
             self.__distance.draw(4)
         self.__button.grid(column=0, row=5, columnspan=3, pady=(5, 0))
-        self.__object.pack()
+        self.pack()
 
     def hide(self):
         self.__v0.hide()
@@ -110,23 +109,23 @@ class ThrowParams:
         if self.__distance is not None:
             self.__distance.hide()
         self.__button.grid_remove()
-        self.__object.pack_forget()
+        self.pack_forget()
 
 
-class Buttons:
+class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
     def __init__(self, window):
-        self.__object = tk.Frame(window)  # Frame for buttons
-        self.__calc_button = tk.Button(self.__object, text=text.calculate, font=style.Btn.font, width=18)
-        self.__save_button = tk.Button(self.__object, text=text.save, font=style.Btn.font, width=18)
-        self.__theory_button = tk.Button(self.__object, text=text.theory, font=style.Btn.font, width=18)
+        super().__init__(window)
+        self.__calc_button = tk.Button(self, text=text.calculate, font=style.Btn.font, width=18)
+        self.__save_button = tk.Button(self, text=text.save, font=style.Btn.font, width=18)
+        self.__theory_button = tk.Button(self, text=text.theory, font=style.Btn.font, width=18)
 
     def draw(self):
         self.__calc_button.pack(pady=5)
         self.__save_button.pack(pady=5)
         self.__theory_button.pack(pady=5)
-        self.__object.pack(side=tk.BOTTOM)
+        self.pack(side=tk.BOTTOM)
 
 
 class ParamRow:
