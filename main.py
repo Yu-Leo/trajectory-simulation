@@ -2,8 +2,8 @@
 
 import tkinter as tk
 
-from widgets import DrawingField
-from windowsParameters import WindowParameters
+from widgets import DrawingField, Menu
+from windowsParameters import WindowParams
 
 
 class MainWindow:
@@ -11,7 +11,7 @@ class MainWindow:
 
     def __init__(self):
         self.__root = tk.Tk()
-        self.__parameters = WindowParameters(title="Abandoned body's flight path simulation")
+        self.__parameters = WindowParams(title="Abandoned body's flight path simulation")
         self.__root.title(self.__parameters.title)
         self.__root.geometry(self.__parameters.geometry())
         self.__root.resizable(*self.__parameters.resizable)
@@ -21,10 +21,12 @@ class MainWindow:
             pass  # Default Tkinter's icon
 
         self.__drawing_field = DrawingField(self.__root)
+        self.__settings = Menu(self.__root)
 
     def run(self):
         """Launching the app"""
         self.__drawing_field.draw()
+        self.__settings.draw()
         self.__root.mainloop()
 
 
