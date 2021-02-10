@@ -15,7 +15,7 @@ class DrawingField:
     def __init__(self, window):
         self.__parameters = DrawingFieldParams(bg="white",
                                                width=500,
-                                               height=400,
+                                               height=430,
                                                padx=10,
                                                pady=10)
 
@@ -36,33 +36,39 @@ class Menu:
         self.__object = tk.Frame(window)  # Frame for all menu
         self.__parameters = SizeParams(None, None, padx=10, pady=10)
 
-        self.__cast_type = ThrowType(self.__object)
-        self.__cast_params = ThrowParams(self.__object, config.trow_type)
+        self.__throw_type = ThrowType(self.__object, change_func=self.change_throw_params_list)
+        self.__throw_params = ThrowParams(self.__object, config.trow_type)
         self.__buttons = Buttons(self.__object)
 
     def draw(self):
-        self.__cast_type.draw()
-        self.__cast_params.draw()
+        self.__throw_type.draw()
+        self.__throw_params.draw()
         self.__buttons.draw()
 
         self.__object.pack(side=tk.RIGHT,
                            padx=self.__parameters.padx,
-                           pady=self.__parameters.pady)
+                           pady=self.__parameters.pady,
+                           fill=tk.Y)
 
+    def change_throw_params_list(self, throw_type):
+        self.__throw_params.hide()
+        self.__throw_params = ThrowParams(self.__object, throw_type)
+        self.__throw_params.draw()
 
 class ThrowType:
     """Class of widget, which chose the throw type"""
 
-    def __init__(self, window):
+    def __init__(self, window, change_func):
         self.__object = tk.Frame(window)
         self.__label = tk.Label(self.__object, text=text.throw_type_title, font="Arial 12")
         self.__menu = Combobox(self.__object, values=text.throw_types, state="readonly", width=22)
-        self.__menu.current(config.trow_type)
+        self.__menu.current(config.trow_type)  # Default value
+        self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
 
     def draw(self):
         self.__label.pack()
         self.__menu.pack()
-        self.__object.pack(pady=20)
+        self.__object.pack(side=tk.TOP, anchor=tk.N, pady=20)
 
 
 class ThrowParams:
@@ -89,6 +95,17 @@ class ThrowParams:
             self.__distance.draw(4)
         self.__button.grid(column=0, row=5, columnspan=3, pady=(5, 0))
         self.__object.pack(pady=(0, 20))
+
+    def hide(self):
+        self.__v0.hide()
+        if self.__alpha is not None:
+            self.__alpha.hide()
+        self.__time.hide()
+        self.__height.hide()
+        if self.__distance is not None:
+            self.__distance.hide()
+        self.__button.grid_remove()
+        self.__object.pack_forget()
 
 
 class Buttons:
@@ -125,3 +142,9 @@ class ParamRow:
         self._entry.grid(column=1, row=row, padx=(0, 5), pady=5)
         if self._button is not None:
             self._button.grid(column=2, row=row, pady=5)
+
+    def hide(self):
+        self._label.grid_remove()
+        self._entry.grid_remove()
+        if self._button is not None:
+            self._button.grid_remove()

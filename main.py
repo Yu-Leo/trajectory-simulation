@@ -11,7 +11,8 @@ class MainWindow:
 
     def __init__(self):
         self.__root = tk.Tk()
-        self.__parameters = WindowParams(title="Abandoned body's flight path simulation")
+        self.__parameters = WindowParams(title="Abandoned body's flight path simulation",
+                                         width=740, height=450)
         self.__root.title(self.__parameters.title)
         self.__root.geometry(self.__parameters.geometry())
         self.__root.resizable(*self.__parameters.resizable)
