@@ -33,7 +33,7 @@ class Menu:
     """Frame with simulation's menu"""
 
     def __init__(self, window):
-        self.__object = tk.Frame(window)
+        self.__object = tk.Frame(window)  # Frame for all menu
         self.__parameters = SizeParams(None, None, padx=10, pady=10)
 
         self.__cast_type = ThrowType(self.__object)
@@ -69,7 +69,7 @@ class ThrowParams:
     """Class of widgets, which set throw parameters"""
 
     def __init__(self, window, throw_type):
-        self.__object = tk.Frame(window)
+        self.__object = tk.Frame(window)  # Frame for params
         self.__v0 = ParamRow(self.__object, "V0")
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
@@ -77,6 +77,7 @@ class ThrowParams:
         self.__time = ParamRow(self.__object, "T", but=True)
         self.__height = ParamRow(self.__object, "H", but=True)
         self.__distance = ParamRow(self.__object, "L", but=True) if need_distance else None
+        self.__button = tk.Button(self.__object, text=text.read_from_file, width=20)
 
     def draw(self):
         self.__v0.draw(0)
@@ -86,22 +87,34 @@ class ThrowParams:
         self.__height.draw(3)
         if self.__distance is not None:
             self.__distance.draw(4)
-        self.__object.pack()
+        self.__button.grid(column=0, row=5, columnspan=3, pady=(5, 0))
+        self.__object.pack(pady=(0, 20))
 
 
 class Buttons:
     """Class of buttons for interaction with app"""
 
     def __init__(self, window):
-        pass
+        self.__object = tk.Frame(window)  # Frame for buttons
+        self.__calc_button = tk.Button(self.__object, text=text.calculate, width=20)
+        self.__save_button = tk.Button(self.__object, text=text.save, width=20)
+        self.__theory_button = tk.Button(self.__object, text=text.theory, width=20)
 
     def draw(self):
-        pass
+        self.__calc_button.pack(pady=5)
+        self.__save_button.pack(pady=5)
+        self.__theory_button.pack(pady=5)
+        self.__object.pack(side=tk.BOTTOM)
 
 
 class ParamRow:
+    """Class of widgets of throw params"""
+
     def __init__(self, window, name, but=False):
-        # self.__object = tk.Frame(window)
+        """
+        :param name: text for label (title)
+        :param but: create button or not
+        """
         self._label = tk.Label(window, text=name, font="Arial 12")
         self._entry = tk.Entry(window)
         button = tk.Button(window, text="calc")
@@ -112,4 +125,3 @@ class ParamRow:
         self._entry.grid(column=1, row=row, padx=(0, 5), pady=5)
         if self._button is not None:
             self._button.grid(column=2, row=row, pady=5)
-        # self.__object.pack(pady=5, anchor=tk.W)
