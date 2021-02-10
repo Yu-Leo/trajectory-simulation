@@ -5,6 +5,7 @@ from tkinter.ttk import Combobox
 
 import config
 import constants as const
+import style
 import text
 from windowsParameters import DrawingFieldParams, SizeParams
 
@@ -55,12 +56,13 @@ class Menu:
         self.__throw_params = ThrowParams(self.__object, throw_type)
         self.__throw_params.draw()
 
+
 class ThrowType:
     """Class of widget, which chose the throw type"""
 
     def __init__(self, window, change_func):
         self.__object = tk.Frame(window)
-        self.__label = tk.Label(self.__object, text=text.throw_type_title, font="Arial 12")
+        self.__label = tk.Label(self.__object, text=text.throw_type_title, font=(style.font_name, 12))
         self.__menu = Combobox(self.__object, values=text.throw_types, state="readonly", width=22)
         self.__menu.current(config.trow_type)  # Default value
         self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
@@ -83,7 +85,7 @@ class ThrowParams:
         self.__time = ParamRow(self.__object, "T", but=True)
         self.__height = ParamRow(self.__object, "H", but=True)
         self.__distance = ParamRow(self.__object, "L", but=True) if need_distance else None
-        self.__button = tk.Button(self.__object, text=text.read_from_file, width=20)
+        self.__button = tk.Button(self.__object, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
     def draw(self):
         self.__v0.draw(0)
@@ -113,9 +115,9 @@ class Buttons:
 
     def __init__(self, window):
         self.__object = tk.Frame(window)  # Frame for buttons
-        self.__calc_button = tk.Button(self.__object, text=text.calculate, width=20)
-        self.__save_button = tk.Button(self.__object, text=text.save, width=20)
-        self.__theory_button = tk.Button(self.__object, text=text.theory, width=20)
+        self.__calc_button = tk.Button(self.__object, text=text.calculate, font=style.Btn.font, width=18)
+        self.__save_button = tk.Button(self.__object, text=text.save, font=style.Btn.font, width=18)
+        self.__theory_button = tk.Button(self.__object, text=text.theory, font=style.Btn.font, width=18)
 
     def draw(self):
         self.__calc_button.pack(pady=5)
