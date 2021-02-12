@@ -13,6 +13,6 @@ class Modes:
     ALPHA = 1
     TIME = 2
     HEIGHT = 3
-    LENGTH = 4
+    DISTANCE = 4
 
     DEFAULT = -1
