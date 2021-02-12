@@ -35,12 +35,12 @@ class DrawingField(tk.Canvas):
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
-    def __init__(self, window):
+    def __init__(self, window, vertical_func):
         super().__init__(window)
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
-
+        self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
         self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
-        self.__throw_params = ThrowParams(self, config.trow_type)
+        self.__throw_params = ThrowParams(self, config.trow_type, self.__vertical_func)
         self.__buttons = Buttons(self)
 
     def draw(self):
@@ -55,7 +55,7 @@ class Menu(tk.Frame):
 
     def change_throw_params_list(self, throw_type):
         self.__throw_params.hide()
-        self.__throw_params = ThrowParams(self, throw_type)
+        self.__throw_params = ThrowParams(self, throw_type, self.__vertical_func)
         self.__throw_params.draw()
 
 
@@ -78,15 +78,20 @@ class ThrowType(tk.Frame):
 class ThrowParams(tk.Frame):
     """Class of widgets, which set throw parameters"""
 
-    def __init__(self, window, throw_type):
+    def __init__(self, window, throw_type, vertical_func):
         super().__init__(window)
-        self.__v0 = ParamRow(self, "V0")
+        if throw_type == const.TrowType.VERTICAL:
+            calc_func = vertical_func
+        else:
+            calc_func = lambda: None
+
+        self.__v0 = ParamRow(self, text.v0, but=True, func=calc_func)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self, "a", but=True) if need_alpha else None
-        self.__time = ParamRow(self, "T", but=True)
-        self.__height = ParamRow(self, "H", but=True)
-        self.__distance = ParamRow(self, "L", but=True) if need_distance else None
+        self.__alpha = ParamRow(self, text.alpha, but=True, func=calc_func) if need_alpha else None
+        self.__time = ParamRow(self, text.time, but=True, func=calc_func)
+        self.__height = ParamRow(self, text.height, but=True, func=calc_func)
+        self.__distance = ParamRow(self, text.length, but=True, func=calc_func) if need_distance else None
         self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
     def draw(self):
@@ -140,15 +145,27 @@ class ParamRow:
         except FileNotFoundError:
             return None
 
-    def __init__(self, window, name, but=False):
+    @staticmethod
+    def __call_calc(i, calculate_func, value):
+        """Chang calculate mode and call calculate_func"""
+        config.calculate_mode = i
+        calculate_func(value)
+
+    def __init__(self, window, name, func, but=False):
         """
         :param name: text for label (title)
         :param but: create button or not
+        :param func: function, which will be called to calculate results
         """
-        self._label = tk.Label(window, text=name, font=(style.font_name, 12))
+        self.__name = name
+        self.__func = func
+        self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
         self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
         calc_image = ParamRow.__get_image()
-        button = tk.Button(window, image=calc_image)
+
+        button = tk.Button(window,
+                           image=calc_image,
+                           command=self.__operation)
         button.image = calc_image
 
         self._button = (button if but else None)
@@ -164,3 +181,14 @@ class ParamRow:
         self._entry.grid_remove()
         if self._button is not None:
             self._button.grid_remove()
+
+    def __operation(self):
+        calc_mode = {text.v0: const.Modes.V0,
+                     text.height: const.Modes.HEIGHT,
+                     text.time: const.Modes.TIME}.get(self.__name, "ERROR")
+        value = self.__get_value()
+        ParamRow.__call_calc(calc_mode, self.__func, value)
+
+    def __get_value(self):
+        """Return entry's value"""
+        return self._entry.get()
