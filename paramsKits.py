@@ -6,7 +6,7 @@ import text
 
 class Kit:
     """Class with all parameters"""
-    digits_after_dot = 5  # Number of digits after the dot
+    DIGITS_AFTER_DOT = 5  # Number of digits after the dot
 
     @staticmethod
     def __check_value(value):
@@ -103,8 +103,8 @@ class Vertical(Kit):
 
     def by_v0(self):
         """Calculate all params by initial speed"""
-        self.height = round((self.v0 ** 2 / (2 * const.G)), Kit.digits_after_dot)
-        self.time = round((self.v0 / const.G), Kit.digits_after_dot)
+        self.height = round((self.v0 ** 2 / (2 * const.G)), Kit.DIGITS_AFTER_DOT)
+        self.time = round((self.v0 / const.G), Kit.DIGITS_AFTER_DOT)
 
     def by_time(self):
         """Calculate all params by flight time"""
@@ -112,4 +112,5 @@ class Vertical(Kit):
 
     def by_height(self):
         """Calculate all params by max height"""
-        pass
+        self.v0 = round((2 * const.G * self.height) ** 0.5, Kit.DIGITS_AFTER_DOT)
+        self.by_v0()
