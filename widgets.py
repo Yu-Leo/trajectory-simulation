@@ -233,9 +233,9 @@ class ParamRow:
 
     def get_value(self):
         """Return entry's value"""
-        return self._entry.get()
+        return str(self._entry.get())
 
     def set_value(self, value):
         """Set value to the entry"""
         self._entry.delete(0, tk.END)
-        self._entry.insert(0, value)
+        self._entry.insert(0, str(value))

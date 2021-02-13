@@ -16,3 +16,6 @@ class Modes:
     DISTANCE = 4
 
     DEFAULT = -1
+
+
+G = 9.8  # Gravitational acceleration

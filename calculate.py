@@ -11,6 +11,4 @@ def vertical_mode():
         value = config.kit.v0
         kit = VerticalKit(v0=value)
         kit.by_v0()
-        # config.kit.set_params(kit)
-
-    print("calc")
+        config.kit.set_params(kit)
