@@ -13,7 +13,11 @@ def vertical_mode():
         kit.by_v0()
         config.kit.set_params(kit)
     elif config.calculate_mode == const.Modes.TIME:
-        pass
+        value = config.kit.time
+        kit = VerticalKit(t=value)
+        kit.by_time()
+        config.kit.set_params(kit)
+
     elif config.calculate_mode == const.Modes.HEIGHT:
         value = config.kit.height
         kit = VerticalKit(h=value)

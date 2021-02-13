@@ -23,10 +23,10 @@ class Kit:
             except Exception:
                 print("Error")
 
-    def __init__(self, v0=None, a=None, t0=None, h=None, d=None):
+    def __init__(self, v0=None, a=None, t=None, h=None, d=None):
         self._v0 = v0  # Initial speed
         self._alpha = a  # Angle of throw
-        self._time = t0  # Flight time
+        self._time = t  # Flight time
         self._height = h  # Max / start height
         self._distance = d  # Flight distance
 
@@ -98,8 +98,8 @@ class Kit:
 class Vertical(Kit):
     """Class with parameters of vertical throw"""
 
-    def __init__(self, v0=None, t0=None, h=None):
-        super().__init__(v0=v0, t0=t0, h=h)
+    def __init__(self, v0=None, t=None, h=None):
+        super().__init__(v0=v0, t=t, h=h)
 
     def by_v0(self):
         """Calculate all params by initial speed"""
@@ -108,7 +108,8 @@ class Vertical(Kit):
 
     def by_time(self):
         """Calculate all params by flight time"""
-        pass
+        self.v0 = round((self.time * const.G), Kit.DIGITS_AFTER_DOT)
+        self.by_v0()
 
     def by_height(self):
         """Calculate all params by max height"""
