@@ -8,6 +8,7 @@ from PIL import ImageTk
 
 import config
 import constants as const
+import exceptions as exc
 import style
 import text
 from windowsParameters import DrawingFieldParams, SizeParams
@@ -78,6 +79,25 @@ class ThrowType(tk.Frame):
 class ThrowParams(tk.Frame):
     """Class of widgets, which set throw parameters"""
 
+    @staticmethod
+    def __get_value_of(field):
+        """Return value on field if it's exists"""
+        if field is not None:
+            return field.get_value()
+        return ""
+
+    @staticmethod
+    def __set_value_to(value, field):
+        """Set value to field if it's exists"""
+        if field is not None:
+            field.set_value(value)
+
+    @staticmethod
+    def __clear(field):
+        """Clear field if it's exists"""
+        if field is not None:
+            field.clear()
+
     def __init__(self, window, throw_type, vertical_func):
         super().__init__(window)
         if throw_type == const.TrowType.VERTICAL:
@@ -120,13 +140,19 @@ class ThrowParams(tk.Frame):
         self.__button.grid_remove()
         self.pack_forget()
 
+    def __get_entries_dict(self):
+        """Generate dict from entries"""
+        entries_dict = {text.v0: self.__get_value_of(self.__v0),
+                        text.alpha: self.__get_value_of(self.__alpha),
+                        text.time: self.__get_value_of(self.__time),
+                        text.height: self.__get_value_of(self.__height),
+                        text.distance: self.__get_value_of(self.__distance)}
+        return entries_dict
+
     def update_config_kit(self):
         """Set values from entries to config kit"""
-        config.kit.v0 = self.__get_value_of(self.__v0)
-        config.kit.alpha = self.__get_value_of(self.__alpha)
-        config.kit.time = self.__get_value_of(self.__time)
-        config.kit.height = self.__get_value_of(self.__height)
-        config.kit.distance = self.__get_value_of(self.__distance)
+        kit_dict = self.__get_entries_dict()
+        config.kit.set_params(kit_dict)
 
     def update_entries(self):
         """Set values from config kit to entries"""
@@ -136,18 +162,11 @@ class ThrowParams(tk.Frame):
         self.__set_value_to(config.kit.height, self.__height)
         self.__set_value_to(config.kit.distance, self.__distance)
 
-    @staticmethod
-    def __get_value_of(field):
-        """Return value on field if field is exists"""
-        if field is not None:
-            return field.get_value()
-        return ""
-
-    @staticmethod
-    def __set_value_to(value, field):
-        """Set value to field if field is exists"""
-        if field is not None:
-            field.set_value(value)
+    def clear_entries(self):
+        """Delete all from entries"""
+        entries = (self.__v0, self.__alpha, self.__time, self.__height, self.__distance)
+        for e in entries:
+            e.clear()
 
 
 class Buttons(tk.Frame):
@@ -164,6 +183,16 @@ class Buttons(tk.Frame):
         self.__save_button.pack(pady=5)
         self.__theory_button.pack(pady=5)
         self.pack(side=tk.BOTTOM)
+
+
+def exceptions_tracker(func):
+    def wrapper(*args):
+        try:
+            func(*args)
+        except exc.EntryContentError as e:
+            print(f"Show message box. Field_ind: {e.field}; Type_ind: {e.exception_type}")
+
+    return wrapper
 
 
 class ParamRow:
@@ -189,6 +218,7 @@ class ParamRow:
             return None
 
     @staticmethod
+    @exceptions_tracker
     def __call_calc(i):
         """Change calculate mode, update config kit and and call calculate_func"""
         config.calculate_mode = i
@@ -238,5 +268,9 @@ class ParamRow:
 
     def set_value(self, value):
         """Set value to the entry"""
-        self._entry.delete(0, tk.END)
+        self.clear()
         self._entry.insert(0, str(value))
+
+    def clear(self):
+        """Clear th entry"""
+        self._entry.delete(0, tk.END)

@@ -1,6 +1,7 @@
 # File with classes of numbers kit in different throw-types
 
 import constants as const
+import exceptions as exc
 import text
 
 
@@ -9,19 +10,23 @@ class Kit:
     DIGITS_AFTER_DOT = 5  # Number of digits after the dot
 
     @staticmethod
-    def __check_value(value):
+    def __check_value(field_ind, value):
         """If value is correct, return it in float else raise Exception"""
-        value_type_is_valid = (value is None) or isinstance(value, str) or isinstance(value, float)
-        if not value_type_is_valid:
-            raise TypeError(f"Value {value} type:{type(value)} is not str")
-        if value == "" or value is None:
-            return 0.0
-        else:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            if value == "":
+                return None
             try:
-                float_val = float(value)
-                return float_val
-            except Exception:
-                print("Error")
+                fl = float(value)
+            except ValueError:
+                raise exc.EntryContentError(field=field_ind, exception_type=exc.TYPE_ERROR)
+            else:
+                return fl
+        elif isinstance(value, float):
+            return value
+        else:
+            raise exc.EntryContentError(field=field_ind, exception_type=exc.TYPE_ERROR)
 
     def __init__(self, v0=None, a=None, t=None, h=None, d=None):
         self._v0 = v0  # Initial speed
@@ -46,53 +51,33 @@ class Kit:
                     text.distance: self._distance}
         return kit_dict.get(key, "ERROR")
 
-    def set_params(self, kit):
+    def set_params(self, kit_dict):
         """Set all params from kit"""
-        self.v0 = kit[text.v0]
-        self.alpha = kit[text.alpha]
-        self.time = kit[text.time]
-        self.height = kit[text.height]
-        self.distance = kit[text.distance]
+        self._v0 = Kit.__check_value(const.Modes.V0, kit_dict[text.v0])
+        self._alpha = Kit.__check_value(const.Modes.ALPHA, kit_dict[text.alpha])
+        self._time = Kit.__check_value(const.Modes.TIME, kit_dict[text.time])
+        self._height = Kit.__check_value(const.Modes.HEIGHT, kit_dict[text.height])
+        self._distance = Kit.__check_value(const.Modes.DISTANCE, kit_dict[text.distance])
 
     @property
     def v0(self):
         return self._v0
 
-    @v0.setter
-    def v0(self, value):
-        self._v0 = Kit.__check_value(value)
-
     @property
     def alpha(self):
         return self._alpha
-
-    @alpha.setter
-    def alpha(self, value):
-        self._alpha = Kit.__check_value(value)
 
     @property
     def time(self):
         return self._time
 
-    @time.setter
-    def time(self, value):
-        self._time = Kit.__check_value(value)
-
     @property
     def height(self):
         return self._height
 
-    @height.setter
-    def height(self, value):
-        self._height = Kit.__check_value(value)
-
     @property
     def distance(self):
         return self._distance
-
-    @distance.setter
-    def distance(self, value):
-        self._distance = Kit.__check_value(value)
 
 
 class Vertical(Kit):
@@ -103,15 +88,15 @@ class Vertical(Kit):
 
     def by_v0(self):
         """Calculate all params by initial speed"""
-        self.height = round((self.v0 ** 2 / (2 * const.G)), Kit.DIGITS_AFTER_DOT)
-        self.time = round((self.v0 / const.G), Kit.DIGITS_AFTER_DOT)
+        self._height = round((self.v0 ** 2 / (2 * const.G)), Kit.DIGITS_AFTER_DOT)
+        self._time = round((self.v0 / const.G), Kit.DIGITS_AFTER_DOT)
 
     def by_time(self):
         """Calculate all params by flight time"""
-        self.v0 = round((self.time * const.G), Kit.DIGITS_AFTER_DOT)
+        self._v0 = round((self.time * const.G), Kit.DIGITS_AFTER_DOT)
         self.by_v0()
 
     def by_height(self):
         """Calculate all params by max height"""
-        self.v0 = round((2 * const.G * self.height) ** 0.5, Kit.DIGITS_AFTER_DOT)
+        self._v0 = round((2 * const.G * self.height) ** 0.5, Kit.DIGITS_AFTER_DOT)
         self.by_v0()
