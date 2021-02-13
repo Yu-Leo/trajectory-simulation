@@ -84,24 +84,17 @@ class ThrowParams(tk.Frame):
             calc_func = vertical_func
         else:
             calc_func = lambda: None
+        ParamRow.set_functions(upd_kit=self.update_config_kit,
+                               upd_entries=self.update_entries,
+                               calc=calc_func)
 
-        self.__v0 = ParamRow(self, text.v0,
-                             upd_func=self.update_config_kit,
-                             but=True, func=calc_func)
+        self.__v0 = ParamRow(self, text.v0, but=True)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self, text.alpha,
-                                upd_func=self.update_config_kit,
-                                but=True, func=calc_func) if need_alpha else None
-        self.__time = ParamRow(self, text.time,
-                               upd_func=self.update_config_kit,
-                               but=True, func=calc_func)
-        self.__height = ParamRow(self, text.height,
-                                 upd_func=self.update_config_kit,
-                                 but=True, func=calc_func)
-        self.__distance = ParamRow(self, text.distance,
-                                   upd_func=self.update_config_kit,
-                                   but=True, func=calc_func) if need_distance else None
+        self.__alpha = ParamRow(self, text.alpha, but=True) if need_alpha else None
+        self.__time = ParamRow(self, text.time, but=True)
+        self.__height = ParamRow(self, text.height, but=True)
+        self.__distance = ParamRow(self, text.distance, but=True) if need_distance else None
 
         self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
@@ -128,19 +121,31 @@ class ThrowParams(tk.Frame):
         self.pack_forget()
 
     def update_config_kit(self):
-        print("update config kit")
+        """Set values from entries to config kit"""
         config.kit.v0 = self.__get_value_of(self.__v0)
         config.kit.alpha = self.__get_value_of(self.__alpha)
         config.kit.time = self.__get_value_of(self.__time)
         config.kit.height = self.__get_value_of(self.__height)
         config.kit.distance = self.__get_value_of(self.__distance)
-        print(config.kit)
+
+    def update_entries(self):
+        """Set values from config kit to entries"""
+        self.__set_value_to(config.kit.v0, self.__v0)
+        self.__set_value_to(config.kit.alpha, self.__alpha)
+        self.__set_value_to(config.kit.time, self.__time)
+        self.__set_value_to(config.kit.height, self.__height)
+        self.__set_value_to(config.kit.distance, self.__distance)
 
     def __get_value_of(self, field):
         """Return value on field if field is exists"""
         if field is not None:
             return field.get_value()
         return ""
+
+    def __set_value_to(self, value, field):
+        """Set value to field if field is exists"""
+        if field is not None:
+            field.set_value(value)
 
 
 class Buttons(tk.Frame):
@@ -161,6 +166,16 @@ class Buttons(tk.Frame):
 
 class ParamRow:
     """Class of widgets of throw params"""
+    update_kit_func = None
+    update_entries_func = None
+    calc_func = None
+
+    @classmethod
+    def set_functions(cls, upd_kit, upd_entries, calc):
+        """Define functions for actions after click button"""
+        cls.update_kit_func = upd_kit
+        cls.update_entries_func = upd_entries
+        cls.calc_func = calc
 
     @staticmethod
     def __get_image():
@@ -172,21 +187,20 @@ class ParamRow:
             return None
 
     @staticmethod
-    def __call_calc(i, calculate_func, value, upd_func):
-        """Change calculate mode, update kit and and call calculate_func"""
+    def __call_calc(i):
+        """Change calculate mode, update config kit and and call calculate_func"""
         config.calculate_mode = i
-        upd_func()
-        calculate_func(value)
+        ParamRow.update_kit_func()
+        ParamRow.calc_func()
+        ParamRow.update_entries_func()
 
-    def __init__(self, window, name, upd_func, func, but=False):
+    def __init__(self, window, name, but=False):
         """
         :param name: text for label (title)
         :param but: create button or not
         :param func: function, which will be called to calculate results
         """
         self.__name = name
-        self.__func = func
-        self.__upd_func = upd_func
         self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
         self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
         calc_image = ParamRow.__get_image()
@@ -211,12 +225,17 @@ class ParamRow:
             self._button.grid_remove()
 
     def __operation(self):
+        """Actions to be performed after clicking"""
         calc_mode = {text.v0: const.Modes.V0,
                      text.height: const.Modes.HEIGHT,
                      text.time: const.Modes.TIME}.get(self.__name, "ERROR")
-        value = self.get_value()
-        ParamRow.__call_calc(calc_mode, self.__func, value, self.__upd_func)
+        ParamRow.__call_calc(calc_mode)
 
     def get_value(self):
         """Return entry's value"""
         return self._entry.get()
+
+    def set_value(self, value):
+        """Set value to the entry"""
+        self._entry.delete(0, tk.END)
+        self._entry.insert(0, value)

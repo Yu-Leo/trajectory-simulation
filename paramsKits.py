@@ -1,5 +1,8 @@
 # File with classes of numbers kit in different throw-types
 
+import text
+
+
 class Kit:
     """Class with all parameters"""
 
@@ -57,6 +60,14 @@ class Kit:
     @distance.setter
     def distance(self, value):
         self._distance = value
+
+    def set_params(self, kit):
+        """Set all params from kit"""
+        self.v0 = kit[text.v0]
+        self.alpha = kit[text.alpha]
+        self.time = kit[text.time]
+        self.height = kit[text.height]
+        self.distance = kit[text.distance]
 
 
 class Vertical(Kit):
