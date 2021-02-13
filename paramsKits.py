@@ -1,10 +1,12 @@
 # File with classes of numbers kit in different throw-types
 
+import constants as const
 import text
 
 
 class Kit:
     """Class with all parameters"""
+    digits_after_dot = 5  # Number of digits after the dot
 
     @staticmethod
     def __check_value(value):
@@ -13,7 +15,7 @@ class Kit:
         if not value_type_is_valid:
             raise TypeError(f"Value {value} type:{type(value)} is not str")
         if value == "" or value is None:
-            return None
+            return 0.0
         else:
             try:
                 float_val = float(value)
@@ -101,7 +103,8 @@ class Vertical(Kit):
 
     def by_v0(self):
         """Calculate all params by initial speed"""
-        pass
+        self.height = round((self.v0 ** 2 / (2 * const.G)), Kit.digits_after_dot)
+        self.time = round((self.v0 / const.G), Kit.digits_after_dot)
 
     def by_time(self):
         """Calculate all params by flight time"""

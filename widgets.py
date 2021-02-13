@@ -136,13 +136,15 @@ class ThrowParams(tk.Frame):
         self.__set_value_to(config.kit.height, self.__height)
         self.__set_value_to(config.kit.distance, self.__distance)
 
-    def __get_value_of(self, field):
+    @staticmethod
+    def __get_value_of(field):
         """Return value on field if field is exists"""
         if field is not None:
             return field.get_value()
         return ""
 
-    def __set_value_to(self, value, field):
+    @staticmethod
+    def __set_value_to(value, field):
         """Set value to field if field is exists"""
         if field is not None:
             field.set_value(value)
@@ -198,7 +200,6 @@ class ParamRow:
         """
         :param name: text for label (title)
         :param but: create button or not
-        :param func: function, which will be called to calculate results
         """
         self.__name = name
         self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
