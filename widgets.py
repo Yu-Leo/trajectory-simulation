@@ -72,7 +72,7 @@ class Menu(tk.Frame):
         if config.throw_type == const.TrowType.VERTICAL:
             calc_func = self.__vertical_func
         else:
-            calc_func = lambda: None
+            calc_func = None
         self.__throw_params.update_config_kit()
         calc_func()
         self.__throw_params.update_entries()
@@ -211,28 +211,12 @@ class Buttons(tk.Frame):
 
 class ParamRow:
     """Class of widgets of throw params"""
-    update_kit_func = None
-    update_entries_func = None
-    calc_func = None
-    clear_entries_func = None
-
-    @classmethod
-    def set_functions(cls, upd_kit, upd_entries, clr_entries, calc):
-        """Define functions for actions after click button"""
-        cls.update_kit_func = upd_kit
-        cls.update_entries_func = upd_entries
-        cls.clear_entries_func = clr_entries
-        cls.calc_func = calc
 
     def __change_mode(self):
         """Change calculate mode"""
         config.calculate_mode = self.__row_ind
 
     def __init__(self, window, row_ind, variable=None):
-        """
-        :param name: text for label (title)
-        :param but: create button or not
-        """
         self.__row_ind = row_ind
         self.__name = text.modes[self.__row_ind]
         self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
