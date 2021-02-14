@@ -135,7 +135,11 @@ class ThrowParams(tk.Frame):
         self.__distance = ParamRow(self, const.Modes.DISTANCE,
                                    variable=self.__calculate_mode) if need_distance else None
 
-        self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
+        self.__button = tk.Button(self,
+                                  text=text.read_from_file,
+                                  font=(style.font_name, 10),
+                                  width=18,
+                                  state=tk.DISABLED)
 
     def draw(self):
         self.__v0.draw(0)
@@ -199,8 +203,16 @@ class Buttons(tk.Frame):
                                         font=style.Btn.font,
                                         width=18,
                                         command=enter)
-        self.__save_button = tk.Button(self, text=text.save, font=style.Btn.font, width=18)
-        self.__theory_button = tk.Button(self, text=text.theory, font=style.Btn.font, width=18)
+        self.__save_button = tk.Button(self,
+                                       text=text.save,
+                                       font=style.Btn.font,
+                                       width=18,
+                                       state=tk.DISABLED)
+        self.__theory_button = tk.Button(self,
+                                         text=text.theory,
+                                         font=style.Btn.font,
+                                         width=18,
+                                         state=tk.DISABLED)
 
     def draw(self):
         self.__enter_button.pack(pady=5)
