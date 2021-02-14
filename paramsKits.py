@@ -22,6 +22,8 @@ class Kit:
             except ValueError:
                 raise exc.EntryContentError(field=field_ind, exception_type=exc.TYPE_ERROR)
             else:
+                if fl <= 0:
+                    raise exc.EntryContentError(field=field_ind, exception_type=exc.RANGE_ERROR)
                 return fl
         elif isinstance(value, float):
             return value
