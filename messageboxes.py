@@ -9,7 +9,7 @@ from exceptions import IntEntryContentError as IntError
 from text import int_exceptions, float_exceptions
 """
 import exceptions as exc
-from text import exceptions_dict
+from text import modes
 
 
 class ErrorMb:
@@ -28,10 +28,10 @@ class ExceptionMb(ErrorMb):
 
     def __init__(self, exception):
         if exception.exception_type == exc.TYPE_ERROR:
-            ErrorMb.__init__(self, title=exceptions_dict[exception.field].title,
-                             message=exceptions_dict[exception.field].type_error)
+            ErrorMb.__init__(self, title=modes[exception.field].title,
+                             message=modes[exception.field].type_error)
         elif exception.exception_type == exc.RANGE_ERROR:
-            ErrorMb.__init__(self, title=exceptions_dict[exception.field].title,
-                             message=exceptions_dict[exception.field].range_error)
+            ErrorMb.__init__(self, title=modes[exception.field].title,
+                             message=modes[exception.field].range_error)
         else:
             raise ValueError("Exception type error")

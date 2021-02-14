@@ -3,9 +3,6 @@
 import tkinter as tk
 from tkinter.ttk import Combobox
 
-from PIL import Image as PilImage
-from PIL import ImageTk
-
 import config
 import constants as const
 import exceptions as exc
@@ -109,14 +106,22 @@ class ThrowParams(tk.Frame):
                                upd_entries=self.update_entries,
                                clr_entries=self.clear_entries,
                                calc=calc_func)
+        def_val = config.calculate_mode
 
-        self.__v0 = ParamRow(self, text.v0, but=True)
+        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
+
+        self.__v0 = ParamRow(self, const.Modes.V0,
+                             variable=self.__calculate_mode)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self, text.alpha, but=True) if need_alpha else None
-        self.__time = ParamRow(self, text.time, but=True)
-        self.__height = ParamRow(self, text.height, but=True)
-        self.__distance = ParamRow(self, text.distance, but=True) if need_distance else None
+        self.__alpha = ParamRow(self, const.Modes.ALPHA,
+                                variable=self.__calculate_mode) if need_alpha else None
+        self.__time = ParamRow(self, const.Modes.TIME,
+                               variable=self.__calculate_mode)
+        self.__height = ParamRow(self, const.Modes.HEIGHT,
+                                 variable=self.__calculate_mode)
+        self.__distance = ParamRow(self, const.Modes.DISTANCE,
+                                   variable=self.__calculate_mode) if need_distance else None
 
         self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
@@ -213,40 +218,26 @@ class ParamRow:
         cls.clear_entries_func = clr_entries
         cls.calc_func = calc
 
-    @staticmethod
-    def __get_image():
-        try:
-            image = PilImage.open(f"img/calc_icon32.ico")
-            image = image.resize((18, 18), PilImage.ANTIALIAS)
-            return ImageTk.PhotoImage(image)
-        except FileNotFoundError:
-            return None
+    def __change_mode(self):
+        """Change calculate mode"""
+        config.calculate_mode = self.__row_ind
 
-    @staticmethod
-    @exceptions_tracker
-    def __call_calc(i):
-        """Change calculate mode, update config kit and and call calculate_func"""
-        config.calculate_mode = i
-        ParamRow.update_kit_func()
-        ParamRow.calc_func()
-        ParamRow.update_entries_func()
-
-    def __init__(self, window, name, but=False):
+    def __init__(self, window, row_ind, variable=None):
         """
         :param name: text for label (title)
         :param but: create button or not
         """
-        self.__name = name
+        self.__row_ind = row_ind
+        self.__name = text.modes[self.__row_ind]
         self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
         self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
-        calc_image = ParamRow.__get_image()
 
-        button = tk.Button(window,
-                           image=calc_image,
-                           command=self.__operation)
-        button.image = calc_image
+        button = tk.Radiobutton(window,
+                                variable=variable,
+                                value=row_ind,
+                                command=self.__change_mode)
 
-        self._button = (button if but else None)
+        self._button = (None if variable is None else button)
 
     def draw(self, row):
         self._label.grid(column=0, row=row, padx=(0, 5), pady=6)
@@ -259,13 +250,6 @@ class ParamRow:
         self._entry.grid_remove()
         if self._button is not None:
             self._button.grid_remove()
-
-    def __operation(self):
-        """Actions to be performed after clicking"""
-        calc_mode = {text.v0: const.Modes.V0,
-                     text.height: const.Modes.HEIGHT,
-                     text.time: const.Modes.TIME}.get(self.__name, "ERROR")
-        ParamRow.__call_calc(calc_mode)
 
     def get_value(self):
         """Return entry's value"""
