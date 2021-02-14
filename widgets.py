@@ -8,8 +8,10 @@ from PIL import ImageTk
 
 import config
 import constants as const
+import exceptions as exc
 import style
 import text
+from messageboxes import ExceptionMb
 from windowsParameters import DrawingFieldParams, SizeParams
 
 
@@ -35,12 +37,12 @@ class DrawingField(tk.Canvas):
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
-    def __init__(self, window):
+    def __init__(self, window, vertical_func):
         super().__init__(window)
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
-
+        self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
         self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
-        self.__throw_params = ThrowParams(self, config.trow_type)
+        self.__throw_params = ThrowParams(self, config.trow_type, self.__vertical_func)
         self.__buttons = Buttons(self)
 
     def draw(self):
@@ -55,7 +57,7 @@ class Menu(tk.Frame):
 
     def change_throw_params_list(self, throw_type):
         self.__throw_params.hide()
-        self.__throw_params = ThrowParams(self, throw_type)
+        self.__throw_params = ThrowParams(self, throw_type, self.__vertical_func)
         self.__throw_params.draw()
 
 
@@ -78,15 +80,44 @@ class ThrowType(tk.Frame):
 class ThrowParams(tk.Frame):
     """Class of widgets, which set throw parameters"""
 
-    def __init__(self, window, throw_type):
+    @staticmethod
+    def __get_value_of(field):
+        """Return value on field if it's exists"""
+        if field is not None:
+            return field.get_value()
+        return ""
+
+    @staticmethod
+    def __set_value_to(value, field):
+        """Set value to field if it's exists"""
+        if field is not None:
+            field.set_value(value)
+
+    @staticmethod
+    def __clear(field):
+        """Clear field if it's exists"""
+        if field is not None:
+            field.clear()
+
+    def __init__(self, window, throw_type, vertical_func):
         super().__init__(window)
-        self.__v0 = ParamRow(self, "V0")
+        if throw_type == const.TrowType.VERTICAL:
+            calc_func = vertical_func
+        else:
+            calc_func = lambda: None
+        ParamRow.set_functions(upd_kit=self.update_config_kit,
+                               upd_entries=self.update_entries,
+                               clr_entries=self.clear_entries,
+                               calc=calc_func)
+
+        self.__v0 = ParamRow(self, text.v0, but=True)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self, "a", but=True) if need_alpha else None
-        self.__time = ParamRow(self, "T", but=True)
-        self.__height = ParamRow(self, "H", but=True)
-        self.__distance = ParamRow(self, "L", but=True) if need_distance else None
+        self.__alpha = ParamRow(self, text.alpha, but=True) if need_alpha else None
+        self.__time = ParamRow(self, text.time, but=True)
+        self.__height = ParamRow(self, text.height, but=True)
+        self.__distance = ParamRow(self, text.distance, but=True) if need_distance else None
+
         self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
     def draw(self):
@@ -111,6 +142,35 @@ class ThrowParams(tk.Frame):
         self.__button.grid_remove()
         self.pack_forget()
 
+    def __get_entries_dict(self):
+        """Generate dict from entries"""
+        entries_dict = {text.v0: self.__get_value_of(self.__v0),
+                        text.alpha: self.__get_value_of(self.__alpha),
+                        text.time: self.__get_value_of(self.__time),
+                        text.height: self.__get_value_of(self.__height),
+                        text.distance: self.__get_value_of(self.__distance)}
+        return entries_dict
+
+    def update_config_kit(self):
+        """Set values from entries to config kit"""
+        kit_dict = self.__get_entries_dict()
+        config.kit.set_params(kit_dict)
+
+    def update_entries(self):
+        """Set values from config kit to entries"""
+        self.__set_value_to(config.kit.v0, self.__v0)
+        self.__set_value_to(config.kit.alpha, self.__alpha)
+        self.__set_value_to(config.kit.time, self.__time)
+        self.__set_value_to(config.kit.height, self.__height)
+        self.__set_value_to(config.kit.distance, self.__distance)
+
+    def clear_entries(self):
+        """Delete all from entries"""
+        entries = (self.__v0, self.__alpha, self.__time, self.__height, self.__distance)
+        for e in entries:
+            if e is not None:
+                e.clear()
+
 
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
@@ -128,8 +188,30 @@ class Buttons(tk.Frame):
         self.pack(side=tk.BOTTOM)
 
 
+def exceptions_tracker(func):
+    def wrapper(*args):
+        try:
+            func(*args)
+        except exc.EntryContentError as e:
+            ExceptionMb(e).show()
+
+    return wrapper
+
+
 class ParamRow:
     """Class of widgets of throw params"""
+    update_kit_func = None
+    update_entries_func = None
+    calc_func = None
+    clear_entries_func = None
+
+    @classmethod
+    def set_functions(cls, upd_kit, upd_entries, clr_entries, calc):
+        """Define functions for actions after click button"""
+        cls.update_kit_func = upd_kit
+        cls.update_entries_func = upd_entries
+        cls.clear_entries_func = clr_entries
+        cls.calc_func = calc
 
     @staticmethod
     def __get_image():
@@ -140,15 +222,28 @@ class ParamRow:
         except FileNotFoundError:
             return None
 
+    @staticmethod
+    @exceptions_tracker
+    def __call_calc(i):
+        """Change calculate mode, update config kit and and call calculate_func"""
+        config.calculate_mode = i
+        ParamRow.update_kit_func()
+        ParamRow.calc_func()
+        ParamRow.update_entries_func()
+
     def __init__(self, window, name, but=False):
         """
         :param name: text for label (title)
         :param but: create button or not
         """
-        self._label = tk.Label(window, text=name, font=(style.font_name, 12))
+        self.__name = name
+        self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
         self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
         calc_image = ParamRow.__get_image()
-        button = tk.Button(window, image=calc_image)
+
+        button = tk.Button(window,
+                           image=calc_image,
+                           command=self.__operation)
         button.image = calc_image
 
         self._button = (button if but else None)
@@ -164,3 +259,23 @@ class ParamRow:
         self._entry.grid_remove()
         if self._button is not None:
             self._button.grid_remove()
+
+    def __operation(self):
+        """Actions to be performed after clicking"""
+        calc_mode = {text.v0: const.Modes.V0,
+                     text.height: const.Modes.HEIGHT,
+                     text.time: const.Modes.TIME}.get(self.__name, "ERROR")
+        ParamRow.__call_calc(calc_mode)
+
+    def get_value(self):
+        """Return entry's value"""
+        return str(self._entry.get())
+
+    def set_value(self, value):
+        """Set value to the entry"""
+        self.clear()
+        self._entry.insert(0, str(value))
+
+    def clear(self):
+        """Clear th entry"""
+        self._entry.delete(0, tk.END)

@@ -2,6 +2,7 @@
 
 import tkinter as tk
 
+from calculate import vertical_mode as calc_vertical
 from widgets import DrawingField, Menu
 from windowsParameters import WindowParams
 
@@ -22,7 +23,7 @@ class MainWindow(tk.Tk):
             pass  # Default Tkinter's icon
 
         self.__drawing_field = DrawingField(self)
-        self.__settings = Menu(self)
+        self.__settings = Menu(self, vertical_func=calc_vertical)
 
     def run(self):
         """Launching the app"""
