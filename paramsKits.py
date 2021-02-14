@@ -9,12 +9,14 @@ class Kit:
     DIGITS_AFTER_DOT = 5  # Number of digits after the dot
 
     @staticmethod
-    def __check_value(field_ind, value):
+    def __check_value(field_ind, calculate_mode, value):
         """If value is correct, return it in float else raise Exception"""
         if value is None:
             return None
         if isinstance(value, str):
             if value == "":
+                if calculate_mode == field_ind:
+                    raise exc.EntryContentError(field=field_ind, exception_type=exc.TYPE_ERROR)
                 return None
             try:
                 fl = float(value)
@@ -52,13 +54,13 @@ class Kit:
                     const.Modes.DISTANCE: self._distance}
         return kit_dict.get(key, "ERROR")
 
-    def set_params(self, kit_dict):
+    def set_params(self, calculate_mode, kit_dict):
         """Set all params from kit"""
-        self._v0 = Kit.__check_value(const.Modes.V0, kit_dict[const.Modes.V0])
-        self._alpha = Kit.__check_value(const.Modes.ALPHA, kit_dict[const.Modes.ALPHA])
-        self._time = Kit.__check_value(const.Modes.TIME, kit_dict[const.Modes.TIME])
-        self._height = Kit.__check_value(const.Modes.HEIGHT, kit_dict[const.Modes.HEIGHT])
-        self._distance = Kit.__check_value(const.Modes.DISTANCE, kit_dict[const.Modes.DISTANCE])
+        self._v0 = Kit.__check_value(const.Modes.V0, calculate_mode, kit_dict[const.Modes.V0])
+        self._alpha = Kit.__check_value(const.Modes.ALPHA, calculate_mode, kit_dict[const.Modes.ALPHA])
+        self._time = Kit.__check_value(const.Modes.TIME, calculate_mode, kit_dict[const.Modes.TIME])
+        self._height = Kit.__check_value(const.Modes.HEIGHT, calculate_mode, kit_dict[const.Modes.HEIGHT])
+        self._distance = Kit.__check_value(const.Modes.DISTANCE, calculate_mode, kit_dict[const.Modes.DISTANCE])
 
     @property
     def v0(self):

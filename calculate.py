@@ -11,16 +11,16 @@ def vertical_mode():
         value = config.kit.v0
         kit = VerticalKit(v0=value)
         kit.by_v0()
-        config.kit.set_params(kit)
+        config.kit.set_params(config.calculate_mode, kit)
     elif config.calculate_mode == const.Modes.TIME:
         value = config.kit.time
         kit = VerticalKit(t=value)
         kit.by_time()
-        config.kit.set_params(kit)
+        config.kit.set_params(config.calculate_mode, kit)
     elif config.calculate_mode == const.Modes.HEIGHT:
         value = config.kit.height
         kit = VerticalKit(h=value)
         kit.by_height()
-        config.kit.set_params(kit)
+        config.kit.set_params(config.calculate_mode, kit)
     else:
         raise ValueError("config.calculate_mode error")

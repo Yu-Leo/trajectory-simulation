@@ -171,7 +171,7 @@ class ThrowParams(tk.Frame):
     def update_config_kit(self):
         """Set values from entries to config kit"""
         kit_dict = self.__get_entries_dict()
-        config.kit.set_params(kit_dict)
+        config.kit.set_params(config.calculate_mode, kit_dict)
 
     def update_entries(self):
         """Set values from config kit to entries"""
