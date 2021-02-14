@@ -13,11 +13,13 @@ calculate = "Расчёт"
 save = "Сохранить"
 theory = "Теория"
 
-v0 = "V0"
-alpha = "a"
-time = "T"
-height = "H"
-distance = "D"
+modes = {
+    const.Modes.V0: "V0",
+    const.Modes.ALPHA: "a",
+    const.Modes.TIME: "T",
+    const.Modes.HEIGHT: "H",
+    const.Modes.DISTANCE: "D",
+}
 
 number_only = "В данное поле можно ввести только число."
 range_exceeding = "В данное поле можно ввести только положительное число."
@@ -34,8 +36,5 @@ class ExceptionTexts:
         self.range_error = range_error
 
 
-exceptions_dict = {const.Modes.V0: ExceptionTexts(v0),
-                   const.Modes.ALPHA: ExceptionTexts(alpha),
-                   const.Modes.TIME: ExceptionTexts(time),
-                   const.Modes.HEIGHT: ExceptionTexts(height),
-                   const.Modes.DISTANCE: ExceptionTexts(distance)}
+def exception_text(index):
+    return ExceptionTexts(field_name=modes[index])

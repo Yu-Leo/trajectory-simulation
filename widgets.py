@@ -3,9 +3,6 @@
 import tkinter as tk
 from tkinter.ttk import Combobox
 
-from PIL import Image as PilImage
-from PIL import ImageTk
-
 import config
 import constants as const
 import exceptions as exc
@@ -34,6 +31,16 @@ class DrawingField(tk.Canvas):
                   pady=self.__parameters.pady)
 
 
+def exceptions_tracker(func):
+    def wrapper(*args):
+        try:
+            func(*args)
+        except exc.EntryContentError as e:
+            ExceptionMb(e).show()
+
+    return wrapper
+
+
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
@@ -42,8 +49,8 @@ class Menu(tk.Frame):
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
         self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
         self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
-        self.__throw_params = ThrowParams(self, config.trow_type, self.__vertical_func)
-        self.__buttons = Buttons(self)
+        self.__throw_params = ThrowParams(self, config.throw_type)
+        self.__buttons = Buttons(self, self.enter)
 
     def draw(self):
         self.__throw_type.draw()
@@ -57,8 +64,18 @@ class Menu(tk.Frame):
 
     def change_throw_params_list(self, throw_type):
         self.__throw_params.hide()
-        self.__throw_params = ThrowParams(self, throw_type, self.__vertical_func)
+        self.__throw_params = ThrowParams(self, throw_type)
         self.__throw_params.draw()
+
+    @exceptions_tracker
+    def enter(self):
+        if config.throw_type == const.TrowType.VERTICAL:
+            calc_func = self.__vertical_func
+        else:
+            calc_func = None
+        self.__throw_params.update_config_kit()
+        calc_func()
+        self.__throw_params.update_entries()
 
 
 class ThrowType(tk.Frame):
@@ -68,7 +85,7 @@ class ThrowType(tk.Frame):
         super().__init__(window)
         self.__label = tk.Label(self, text=text.throw_type_title, font=(style.font_name, 12))
         self.__menu = Combobox(self, values=text.throw_types, state="readonly", width=22)
-        self.__menu.current(config.trow_type)  # Default value
+        self.__menu.current(config.throw_type)  # Default value
         self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
 
     def draw(self):
@@ -99,24 +116,24 @@ class ThrowParams(tk.Frame):
         if field is not None:
             field.clear()
 
-    def __init__(self, window, throw_type, vertical_func):
+    def __init__(self, window, throw_type):
         super().__init__(window)
-        if throw_type == const.TrowType.VERTICAL:
-            calc_func = vertical_func
-        else:
-            calc_func = lambda: None
-        ParamRow.set_functions(upd_kit=self.update_config_kit,
-                               upd_entries=self.update_entries,
-                               clr_entries=self.clear_entries,
-                               calc=calc_func)
 
-        self.__v0 = ParamRow(self, text.v0, but=True)
+        def_val = config.calculate_mode
+        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
+
+        self.__v0 = ParamRow(self, const.Modes.V0,
+                             variable=self.__calculate_mode)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
-        self.__alpha = ParamRow(self, text.alpha, but=True) if need_alpha else None
-        self.__time = ParamRow(self, text.time, but=True)
-        self.__height = ParamRow(self, text.height, but=True)
-        self.__distance = ParamRow(self, text.distance, but=True) if need_distance else None
+        self.__alpha = ParamRow(self, const.Modes.ALPHA,
+                                variable=self.__calculate_mode) if need_alpha else None
+        self.__time = ParamRow(self, const.Modes.TIME,
+                               variable=self.__calculate_mode)
+        self.__height = ParamRow(self, const.Modes.HEIGHT,
+                                 variable=self.__calculate_mode)
+        self.__distance = ParamRow(self, const.Modes.DISTANCE,
+                                   variable=self.__calculate_mode) if need_distance else None
 
         self.__button = tk.Button(self, text=text.read_from_file, font=(style.font_name, 10), width=18)
 
@@ -144,17 +161,17 @@ class ThrowParams(tk.Frame):
 
     def __get_entries_dict(self):
         """Generate dict from entries"""
-        entries_dict = {text.v0: self.__get_value_of(self.__v0),
-                        text.alpha: self.__get_value_of(self.__alpha),
-                        text.time: self.__get_value_of(self.__time),
-                        text.height: self.__get_value_of(self.__height),
-                        text.distance: self.__get_value_of(self.__distance)}
+        entries_dict = {const.Modes.V0: self.__get_value_of(self.__v0),
+                        const.Modes.ALPHA: self.__get_value_of(self.__alpha),
+                        const.Modes.TIME: self.__get_value_of(self.__time),
+                        const.Modes.HEIGHT: self.__get_value_of(self.__height),
+                        const.Modes.DISTANCE: self.__get_value_of(self.__distance)}
         return entries_dict
 
     def update_config_kit(self):
         """Set values from entries to config kit"""
         kit_dict = self.__get_entries_dict()
-        config.kit.set_params(kit_dict)
+        config.kit.set_params(config.calculate_mode, kit_dict)
 
     def update_entries(self):
         """Set values from config kit to entries"""
@@ -175,78 +192,42 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window):
+    def __init__(self, window, enter):
         super().__init__(window)
-        self.__calc_button = tk.Button(self, text=text.calculate, font=style.Btn.font, width=18)
+        self.__enter_button = tk.Button(self,
+                                        text=text.calculate,
+                                        font=style.Btn.font,
+                                        width=18,
+                                        command=enter)
         self.__save_button = tk.Button(self, text=text.save, font=style.Btn.font, width=18)
         self.__theory_button = tk.Button(self, text=text.theory, font=style.Btn.font, width=18)
 
     def draw(self):
-        self.__calc_button.pack(pady=5)
+        self.__enter_button.pack(pady=5)
         self.__save_button.pack(pady=5)
         self.__theory_button.pack(pady=5)
         self.pack(side=tk.BOTTOM)
 
 
-def exceptions_tracker(func):
-    def wrapper(*args):
-        try:
-            func(*args)
-        except exc.EntryContentError as e:
-            ExceptionMb(e).show()
-
-    return wrapper
-
-
 class ParamRow:
     """Class of widgets of throw params"""
-    update_kit_func = None
-    update_entries_func = None
-    calc_func = None
-    clear_entries_func = None
 
-    @classmethod
-    def set_functions(cls, upd_kit, upd_entries, clr_entries, calc):
-        """Define functions for actions after click button"""
-        cls.update_kit_func = upd_kit
-        cls.update_entries_func = upd_entries
-        cls.clear_entries_func = clr_entries
-        cls.calc_func = calc
+    def __change_mode(self):
+        """Change calculate mode"""
+        config.calculate_mode = self.__row_ind
 
-    @staticmethod
-    def __get_image():
-        try:
-            image = PilImage.open(f"img/calc_icon32.ico")
-            image = image.resize((18, 18), PilImage.ANTIALIAS)
-            return ImageTk.PhotoImage(image)
-        except FileNotFoundError:
-            return None
-
-    @staticmethod
-    @exceptions_tracker
-    def __call_calc(i):
-        """Change calculate mode, update config kit and and call calculate_func"""
-        config.calculate_mode = i
-        ParamRow.update_kit_func()
-        ParamRow.calc_func()
-        ParamRow.update_entries_func()
-
-    def __init__(self, window, name, but=False):
-        """
-        :param name: text for label (title)
-        :param but: create button or not
-        """
-        self.__name = name
+    def __init__(self, window, row_ind, variable=None):
+        self.__row_ind = row_ind
+        self.__name = text.modes[self.__row_ind]
         self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
         self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
-        calc_image = ParamRow.__get_image()
 
-        button = tk.Button(window,
-                           image=calc_image,
-                           command=self.__operation)
-        button.image = calc_image
+        button = tk.Radiobutton(window,
+                                variable=variable,
+                                value=row_ind,
+                                command=self.__change_mode)
 
-        self._button = (button if but else None)
+        self._button = (None if variable is None else button)
 
     def draw(self, row):
         self._label.grid(column=0, row=row, padx=(0, 5), pady=6)
@@ -259,13 +240,6 @@ class ParamRow:
         self._entry.grid_remove()
         if self._button is not None:
             self._button.grid_remove()
-
-    def __operation(self):
-        """Actions to be performed after clicking"""
-        calc_mode = {text.v0: const.Modes.V0,
-                     text.height: const.Modes.HEIGHT,
-                     text.time: const.Modes.TIME}.get(self.__name, "ERROR")
-        ParamRow.__call_calc(calc_mode)
 
     def get_value(self):
         """Return entry's value"""

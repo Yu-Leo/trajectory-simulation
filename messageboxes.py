@@ -2,18 +2,12 @@
 
 import tkinter.messagebox as mb
 
-"""
-from constants import Exceptions as ConstEx
-from exceptions import FloatEntryContentError as FloatError
-from exceptions import IntEntryContentError as IntError
-from text import int_exceptions, float_exceptions
-"""
 import exceptions as exc
-from text import exceptions_dict
+from text import exception_text
 
 
 class ErrorMb:
-    """Messagebox типа Error"""
+    """Messagebox with Error-type"""
 
     def __init__(self, title, message):
         self.title = title
@@ -24,14 +18,14 @@ class ErrorMb:
 
 
 class ExceptionMb(ErrorMb):
-    """Messagebox-ы самописных ошибок"""
+    """Messageboxes for my exceptions"""
 
     def __init__(self, exception):
         if exception.exception_type == exc.TYPE_ERROR:
-            ErrorMb.__init__(self, title=exceptions_dict[exception.field].title,
-                             message=exceptions_dict[exception.field].type_error)
+            ErrorMb.__init__(self, title=exception_text(exception.field).title,
+                             message=exception_text(exception.field).type_error)
         elif exception.exception_type == exc.RANGE_ERROR:
-            ErrorMb.__init__(self, title=exceptions_dict[exception.field].title,
-                             message=exceptions_dict[exception.field].range_error)
+            ErrorMb.__init__(self, title=exception_text(exception.field).title,
+                             message=exception_text(exception.field).range_error)
         else:
             raise ValueError("Exception type error")
