@@ -138,7 +138,8 @@ class ThrowParams(tk.Frame):
         self.__button = tk.Button(self,
                                   text=text.read_from_file,
                                   font=(style.font_name, 10),
-                                  width=18,
+                                  width=style.Btn.width,
+                                  bg=style.Btn.colors["read"],
                                   state=tk.DISABLED)
 
     def draw(self):
@@ -202,21 +203,25 @@ class Buttons(tk.Frame):
                                         text=text.clear,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
+                                        bg=style.Btn.colors["clear"],
                                         state=tk.DISABLED)
         self.__enter_button = tk.Button(self,
                                         text=text.calculate,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
+                                        bg=style.Btn.colors["enter"],
                                         command=enter)
         self.__save_button = tk.Button(self,
                                        text=text.save,
                                        font=style.Btn.font,
                                        width=style.Btn.width,
+                                       bg=style.Btn.colors["save"],
                                        state=tk.DISABLED)
         self.__theory_button = tk.Button(self,
                                          text=text.theory,
                                          font=style.Btn.font,
                                          width=style.Btn.width,
+                                         bg=style.Btn.colors["theory"],
                                          state=tk.DISABLED)
 
     def draw(self):
