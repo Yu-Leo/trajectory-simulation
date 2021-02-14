@@ -11,6 +11,7 @@ import constants as const
 import exceptions as exc
 import style
 import text
+from messageboxes import ExceptionMb
 from windowsParameters import DrawingFieldParams, SizeParams
 
 
@@ -106,6 +107,7 @@ class ThrowParams(tk.Frame):
             calc_func = lambda: None
         ParamRow.set_functions(upd_kit=self.update_config_kit,
                                upd_entries=self.update_entries,
+                               clr_entries=self.clear_entries,
                                calc=calc_func)
 
         self.__v0 = ParamRow(self, text.v0, but=True)
@@ -166,7 +168,8 @@ class ThrowParams(tk.Frame):
         """Delete all from entries"""
         entries = (self.__v0, self.__alpha, self.__time, self.__height, self.__distance)
         for e in entries:
-            e.clear()
+            if e is not None:
+                e.clear()
 
 
 class Buttons(tk.Frame):
@@ -190,7 +193,7 @@ def exceptions_tracker(func):
         try:
             func(*args)
         except exc.EntryContentError as e:
-            print(f"Show message box. Field_ind: {e.field}; Type_ind: {e.exception_type}")
+            ExceptionMb(e).show()
 
     return wrapper
 
@@ -200,12 +203,14 @@ class ParamRow:
     update_kit_func = None
     update_entries_func = None
     calc_func = None
+    clear_entries_func = None
 
     @classmethod
-    def set_functions(cls, upd_kit, upd_entries, calc):
+    def set_functions(cls, upd_kit, upd_entries, clr_entries, calc):
         """Define functions for actions after click button"""
         cls.update_kit_func = upd_kit
         cls.update_entries_func = upd_entries
+        cls.clear_entries_func = clr_entries
         cls.calc_func = calc
 
     @staticmethod
