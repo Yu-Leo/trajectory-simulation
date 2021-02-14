@@ -31,6 +31,16 @@ class DrawingField(tk.Canvas):
                   pady=self.__parameters.pady)
 
 
+def exceptions_tracker(func):
+    def wrapper(*args):
+        try:
+            func(*args)
+        except exc.EntryContentError as e:
+            ExceptionMb(e).show()
+
+    return wrapper
+
+
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
@@ -39,8 +49,8 @@ class Menu(tk.Frame):
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
         self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
         self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
-        self.__throw_params = ThrowParams(self, config.trow_type, self.__vertical_func)
-        self.__buttons = Buttons(self)
+        self.__throw_params = ThrowParams(self, config.throw_type)
+        self.__buttons = Buttons(self, self.enter)
 
     def draw(self):
         self.__throw_type.draw()
@@ -54,8 +64,18 @@ class Menu(tk.Frame):
 
     def change_throw_params_list(self, throw_type):
         self.__throw_params.hide()
-        self.__throw_params = ThrowParams(self, throw_type, self.__vertical_func)
+        self.__throw_params = ThrowParams(self, throw_type)
         self.__throw_params.draw()
+
+    @exceptions_tracker
+    def enter(self):
+        if config.throw_type == const.TrowType.VERTICAL:
+            calc_func = self.__vertical_func
+        else:
+            calc_func = lambda: None
+        self.__throw_params.update_config_kit()
+        calc_func()
+        self.__throw_params.update_entries()
 
 
 class ThrowType(tk.Frame):
@@ -65,7 +85,7 @@ class ThrowType(tk.Frame):
         super().__init__(window)
         self.__label = tk.Label(self, text=text.throw_type_title, font=(style.font_name, 12))
         self.__menu = Combobox(self, values=text.throw_types, state="readonly", width=22)
-        self.__menu.current(config.trow_type)  # Default value
+        self.__menu.current(config.throw_type)  # Default value
         self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
 
     def draw(self):
@@ -96,18 +116,10 @@ class ThrowParams(tk.Frame):
         if field is not None:
             field.clear()
 
-    def __init__(self, window, throw_type, vertical_func):
+    def __init__(self, window, throw_type):
         super().__init__(window)
-        if throw_type == const.TrowType.VERTICAL:
-            calc_func = vertical_func
-        else:
-            calc_func = lambda: None
-        ParamRow.set_functions(upd_kit=self.update_config_kit,
-                               upd_entries=self.update_entries,
-                               clr_entries=self.clear_entries,
-                               calc=calc_func)
-        def_val = config.calculate_mode
 
+        def_val = config.calculate_mode
         self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
 
         self.__v0 = ParamRow(self, const.Modes.V0,
@@ -149,11 +161,11 @@ class ThrowParams(tk.Frame):
 
     def __get_entries_dict(self):
         """Generate dict from entries"""
-        entries_dict = {text.v0: self.__get_value_of(self.__v0),
-                        text.alpha: self.__get_value_of(self.__alpha),
-                        text.time: self.__get_value_of(self.__time),
-                        text.height: self.__get_value_of(self.__height),
-                        text.distance: self.__get_value_of(self.__distance)}
+        entries_dict = {const.Modes.V0: self.__get_value_of(self.__v0),
+                        const.Modes.ALPHA: self.__get_value_of(self.__alpha),
+                        const.Modes.TIME: self.__get_value_of(self.__time),
+                        const.Modes.HEIGHT: self.__get_value_of(self.__height),
+                        const.Modes.DISTANCE: self.__get_value_of(self.__distance)}
         return entries_dict
 
     def update_config_kit(self):
@@ -180,27 +192,21 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window):
+    def __init__(self, window, enter):
         super().__init__(window)
-        self.__calc_button = tk.Button(self, text=text.calculate, font=style.Btn.font, width=18)
+        self.__enter_button = tk.Button(self,
+                                        text=text.calculate,
+                                        font=style.Btn.font,
+                                        width=18,
+                                        command=enter)
         self.__save_button = tk.Button(self, text=text.save, font=style.Btn.font, width=18)
         self.__theory_button = tk.Button(self, text=text.theory, font=style.Btn.font, width=18)
 
     def draw(self):
-        self.__calc_button.pack(pady=5)
+        self.__enter_button.pack(pady=5)
         self.__save_button.pack(pady=5)
         self.__theory_button.pack(pady=5)
         self.pack(side=tk.BOTTOM)
-
-
-def exceptions_tracker(func):
-    def wrapper(*args):
-        try:
-            func(*args)
-        except exc.EntryContentError as e:
-            ExceptionMb(e).show()
-
-    return wrapper
 
 
 class ParamRow:

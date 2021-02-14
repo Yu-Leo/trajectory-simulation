@@ -3,7 +3,7 @@
 import constants as const
 from paramsKits import Kit
 
-trow_type = const.TrowType.DEFAULT
+throw_type = const.TrowType.DEFAULT
 calculate_mode = const.Modes.DEFAULT
 
 kit = Kit()
