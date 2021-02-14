@@ -18,7 +18,7 @@ class DrawingField(tk.Canvas):
     def __init__(self, window):
         self.__parameters = DrawingFieldParams(bg="white",
                                                width=500,
-                                               height=430,
+                                               height=window.parameters.height,
                                                padx=10,
                                                pady=10)
         super().__init__(window, bg=self.__parameters.bg,
@@ -198,23 +198,29 @@ class Buttons(tk.Frame):
 
     def __init__(self, window, enter):
         super().__init__(window)
+        self.__clear_button = tk.Button(self,
+                                        text=text.clear,
+                                        font=style.Btn.font,
+                                        width=style.Btn.width,
+                                        state=tk.DISABLED)
         self.__enter_button = tk.Button(self,
                                         text=text.calculate,
                                         font=style.Btn.font,
-                                        width=18,
+                                        width=style.Btn.width,
                                         command=enter)
         self.__save_button = tk.Button(self,
                                        text=text.save,
                                        font=style.Btn.font,
-                                       width=18,
+                                       width=style.Btn.width,
                                        state=tk.DISABLED)
         self.__theory_button = tk.Button(self,
                                          text=text.theory,
                                          font=style.Btn.font,
-                                         width=18,
+                                         width=style.Btn.width,
                                          state=tk.DISABLED)
 
     def draw(self):
+        self.__clear_button.pack(pady=5)
         self.__enter_button.pack(pady=5)
         self.__save_button.pack(pady=5)
         self.__theory_button.pack(pady=5)

@@ -12,13 +12,13 @@ class MainWindow(tk.Tk):
 
     def __init__(self):
         super().__init__()
-        parameters = WindowParams(title="Abandoned body's trajectory simulation",
-                                  width=740, height=450)
-        self.title(parameters.title)
-        self.geometry(parameters.geometry())
-        self.resizable(*parameters.resizable)
+        self.parameters = WindowParams(title="Abandoned body's trajectory simulation",
+                                       width=740, height=475)
+        self.title(self.parameters.title)
+        self.geometry(self.parameters.geometry())
+        self.resizable(*self.parameters.resizable)
         try:
-            self.iconbitmap(parameters.ico_path)
+            self.iconbitmap(self.parameters.ico_path)
         except tk.TclError:  # Icon display error
             pass  # Default Tkinter's icon
 
