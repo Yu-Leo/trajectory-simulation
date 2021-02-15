@@ -115,6 +115,7 @@ class ThrowParams(tk.Frame):
     def __set_value_to(value, field):
         """Set value to field if it's exists"""
         if field is not None:
+            value = "" if value is None else value
             field.set_value(value)
 
     @staticmethod
@@ -128,9 +129,9 @@ class ThrowParams(tk.Frame):
 
         def_val = config.calculate_mode
         self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
-
+        var_for_v0 = (None if throw_type == const.TrowType.HORIZONTAL else self.__calculate_mode)
         self.__v0 = ParamRow(self, const.Modes.V0,
-                             variable=self.__calculate_mode)
+                             variable=var_for_v0)
         need_alpha = throw_type == const.TrowType.ALPHA
         need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
         self.__alpha = ParamRow(self, const.Modes.ALPHA,
