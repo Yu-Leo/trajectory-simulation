@@ -44,10 +44,13 @@ def exceptions_tracker(func):
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
-    def __init__(self, window, vertical_func):
+    def __init__(self, window, vertical_func, horizontal_func):
         super().__init__(window)
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
-        self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
+        # Function, which called to calculation in vertical mode
+        self.__vertical_func = vertical_func
+        # Function, which called to calculation in horizontal mode
+        self.__horizontal_func = horizontal_func
         self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
         self.__throw_params = ThrowParams(self, config.throw_type)
         self.__buttons = Buttons(self, self.enter)
@@ -63,6 +66,7 @@ class Menu(tk.Frame):
                   fill=tk.Y)
 
     def change_throw_params_list(self, throw_type):
+        config.throw_type = throw_type
         self.__throw_params.hide()
         self.__throw_params = ThrowParams(self, throw_type)
         self.__throw_params.draw()
@@ -71,8 +75,11 @@ class Menu(tk.Frame):
     def enter(self):
         if config.throw_type == const.TrowType.VERTICAL:
             calc_func = self.__vertical_func
+        elif config.throw_type == const.TrowType.HORIZONTAL:
+            calc_func = self.__horizontal_func
         else:
             calc_func = None
+
         self.__throw_params.update_config_kit()
         calc_func()
         self.__throw_params.update_entries()

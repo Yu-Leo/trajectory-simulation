@@ -24,3 +24,8 @@ def vertical_mode():
         config.kit.set_params(config.calculate_mode, kit)
     else:
         raise ValueError("config.calculate_mode error")
+
+
+def horizontal_mode():
+    """Calculate params in horizontal mode"""
+    pass

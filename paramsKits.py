@@ -103,3 +103,16 @@ class Vertical(Kit):
         """Calculate all params by max height"""
         self._v0 = round((2 * const.G * self.height) ** 0.5, Kit.DIGITS_AFTER_DOT)
         self.by_v0()
+
+
+class Horizontal(Kit):
+    def __init__(self, v0=None, t=None, h=None):
+        super().__init__(v0=v0, t=t, h=h)
+
+    def by_v0_and_time(self):
+        """Calculate all params by initial speed and flight time"""
+        pass
+
+    def by_v0_and_height(self):
+        """Calculate all params by initial speed and height from which the throw was made"""
+        pass
