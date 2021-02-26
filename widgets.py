@@ -44,11 +44,17 @@ def exceptions_tracker(func):
 class Menu(tk.Frame):
     """Frame with simulation's menu"""
 
-    def __init__(self, window, vertical_func):
+    def __init__(self, window, vertical_func, horizontal_func, alpha_func):
         super().__init__(window)
         self.__parameters = SizeParams(None, None, padx=(0, 15), pady=10)
-        self.__vertical_func = vertical_func  # Function, which called to calculation in vertical mode
-        self.__throw_type = ThrowType(self, change_func=self.change_throw_params_list)
+        # Function, which called to calculation in vertical mode
+        self.__vertical_func = vertical_func
+        # Function, which called to calculation in horizontal mode
+        self.__horizontal_func = horizontal_func
+        # Function, which called to calculation in alpha mode
+        self.__alpha_func = alpha_func
+        self.__throw_type = ThrowType(self,
+                                      change_func=self.change_throw_params_list)
         self.__throw_params = ThrowParams(self, config.throw_type)
         self.__buttons = Buttons(self, self.enter)
 
@@ -63,16 +69,22 @@ class Menu(tk.Frame):
                   fill=tk.Y)
 
     def change_throw_params_list(self, throw_type):
+        config.throw_type = throw_type
         self.__throw_params.hide()
         self.__throw_params = ThrowParams(self, throw_type)
         self.__throw_params.draw()
 
     @exceptions_tracker
     def enter(self):
-        if config.throw_type == const.TrowType.VERTICAL:
+        if config.throw_type == const.ThrowType.VERTICAL:
             calc_func = self.__vertical_func
+        elif config.throw_type == const.ThrowType.HORIZONTAL:
+            calc_func = self.__horizontal_func
+        elif config.throw_type == const.ThrowType.ALPHA:
+            calc_func = self.__alpha_func
         else:
-            calc_func = None
+            raise ValueError("invalid value of config.throw_type")
+
         self.__throw_params.update_config_kit()
         calc_func()
         self.__throw_params.update_entries()
@@ -83,10 +95,13 @@ class ThrowType(tk.Frame):
 
     def __init__(self, window, change_func):
         super().__init__(window)
-        self.__label = tk.Label(self, text=text.throw_type_title, font=(style.font_name, 12))
-        self.__menu = Combobox(self, values=text.throw_types, state="readonly", width=22)
+        self.__label = tk.Label(self, text=text.throw_type_title,
+                                font=(style.font_name, 12))
+        self.__menu = Combobox(self, values=text.throw_types,
+                               state="readonly", width=22)
         self.__menu.current(config.throw_type)  # Default value
-        self.__menu.bind("<<ComboboxSelected>>", lambda event: change_func(self.__menu.current()))
+        self.__menu.bind("<<ComboboxSelected>>",
+                         lambda event: change_func(self.__menu.current()))
 
     def draw(self):
         self.__label.pack(pady=5)
@@ -108,6 +123,7 @@ class ThrowParams(tk.Frame):
     def __set_value_to(value, field):
         """Set value to field if it's exists"""
         if field is not None:
+            value = "" if value is None else value
             field.set_value(value)
 
     @staticmethod
@@ -122,10 +138,15 @@ class ThrowParams(tk.Frame):
         def_val = config.calculate_mode
         self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
 
+        if throw_type in (const.ThrowType.HORIZONTAL, const.ThrowType.ALPHA):
+            var_for_v0 = None
+        else:
+            var_for_v0 = self.__calculate_mode
+
         self.__v0 = ParamRow(self, const.Modes.V0,
-                             variable=self.__calculate_mode)
-        need_alpha = throw_type == const.TrowType.ALPHA
-        need_distance = throw_type in (const.TrowType.ALPHA, const.TrowType.HORIZONTAL)
+                             variable=var_for_v0)
+        need_alpha = throw_type == const.ThrowType.ALPHA
+        need_distance = throw_type in (const.ThrowType.ALPHA, const.ThrowType.HORIZONTAL)
         self.__alpha = ParamRow(self, const.Modes.ALPHA,
                                 variable=self.__calculate_mode) if need_alpha else None
         self.__time = ParamRow(self, const.Modes.TIME,
@@ -165,7 +186,7 @@ class ThrowParams(tk.Frame):
         self.pack_forget()
 
     def __get_entries_dict(self):
-        """Generate dict from entries"""
+        """Generate dictionary from entries"""
         entries_dict = {const.Modes.V0: self.__get_value_of(self.__v0),
                         const.Modes.ALPHA: self.__get_value_of(self.__alpha),
                         const.Modes.TIME: self.__get_value_of(self.__time),
@@ -176,7 +197,7 @@ class ThrowParams(tk.Frame):
     def update_config_kit(self):
         """Set values from entries to config kit"""
         kit_dict = self.__get_entries_dict()
-        config.kit.set_params(config.calculate_mode, kit_dict)
+        config.kit.set_params(config.throw_type, config.calculate_mode, kit_dict)
 
     def update_entries(self):
         """Set values from config kit to entries"""

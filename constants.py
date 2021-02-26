@@ -1,11 +1,12 @@
 # File with constants
 
-class TrowType:
+
+class ThrowType:
     VERTICAL = 0
     HORIZONTAL = 1
     ALPHA = 2
 
-    DEFAULT = VERTICAL
+    DEFAULT = HORIZONTAL
 
 
 class Modes:
@@ -15,7 +16,7 @@ class Modes:
     HEIGHT = 3
     DISTANCE = 4
 
-    DEFAULT = V0
+    DEFAULT = TIME
 
 
 G = 9.8  # Gravitational acceleration
