@@ -150,7 +150,7 @@ class Horizontal(Kit):
 
 
 class Alpha(Kit):
-    """Class with parameters of throw под углом к горизонту"""
+    """Class with parameters of throw at an angle to the horizon"""
 
     def __init__(self, v0=None, a=None, t=None, h=None, d=None):
         super().__init__(v0=v0, a=a, t=t, h=h, d=d)
