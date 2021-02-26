@@ -6,7 +6,7 @@ class ThrowType:
     HORIZONTAL = 1
     ALPHA = 2
 
-    DEFAULT = HORIZONTAL
+    DEFAULT = ALPHA
 
 
 class Modes:
