@@ -9,14 +9,20 @@ class Kit:
     DIGITS_AFTER_DOT = 5  # Number of digits after the dot
 
     @staticmethod
-    def __check_value(field_ind, calculate_mode, value):
+    def __check_value(field_ind, throw_type, calculate_mode, value):
         """If value is correct, return it in float else raise Exception"""
         if value is None:
             return None
         if isinstance(value, str):
             if value == "":
+                if (throw_type == const.ThrowType.HORIZONTAL and
+                        field_ind == const.Modes.V0):
+                    raise exc.EntryContentError(field=field_ind,
+                                                exception_type=exc.TYPE_ERROR)
                 if calculate_mode == field_ind:
-                    raise exc.EntryContentError(field=field_ind, exception_type=exc.TYPE_ERROR)
+                    raise exc.EntryContentError(field=field_ind,
+                                                exception_type=exc.TYPE_ERROR)
+
                 return None
             try:
                 fl = float(value)
@@ -54,13 +60,18 @@ class Kit:
                     const.Modes.DISTANCE: self._distance}
         return kit_dict.get(key, "ERROR")
 
-    def set_params(self, calculate_mode, kit_dict):
+    def set_params(self, throw_type, calculate_mode, kit_dict):
         """Set all params from kit"""
-        self._v0 = Kit.__check_value(const.Modes.V0, calculate_mode, kit_dict[const.Modes.V0])
-        self._alpha = Kit.__check_value(const.Modes.ALPHA, calculate_mode, kit_dict[const.Modes.ALPHA])
-        self._time = Kit.__check_value(const.Modes.TIME, calculate_mode, kit_dict[const.Modes.TIME])
-        self._height = Kit.__check_value(const.Modes.HEIGHT, calculate_mode, kit_dict[const.Modes.HEIGHT])
-        self._distance = Kit.__check_value(const.Modes.DISTANCE, calculate_mode, kit_dict[const.Modes.DISTANCE])
+        self._v0 = Kit.__check_value(const.Modes.V0, throw_type,
+                                     calculate_mode, kit_dict[const.Modes.V0])
+        self._alpha = Kit.__check_value(const.Modes.ALPHA, throw_type,
+                                        calculate_mode, kit_dict[const.Modes.ALPHA])
+        self._time = Kit.__check_value(const.Modes.TIME, throw_type,
+                                       calculate_mode, kit_dict[const.Modes.TIME])
+        self._height = Kit.__check_value(const.Modes.HEIGHT, throw_type,
+                                         calculate_mode, kit_dict[const.Modes.HEIGHT])
+        self._distance = Kit.__check_value(const.Modes.DISTANCE, throw_type,
+                                           calculate_mode, kit_dict[const.Modes.DISTANCE])
 
     @property
     def v0(self):
@@ -91,28 +102,67 @@ class Vertical(Kit):
 
     def by_v0(self):
         """Calculate all params by initial speed"""
-        self._height = round((self.v0 ** 2 / (2 * const.G)), Kit.DIGITS_AFTER_DOT)
-        self._time = round((self.v0 / const.G), Kit.DIGITS_AFTER_DOT)
+        height = self.v0 ** 2 / (2 * const.G)
+        self._height = round(height, Kit.DIGITS_AFTER_DOT)
+        time = self.v0 / const.G
+        self._time = round(time, Kit.DIGITS_AFTER_DOT)
 
     def by_time(self):
         """Calculate all params by flight time"""
-        self._v0 = round((self.time * const.G), Kit.DIGITS_AFTER_DOT)
+        v0 = self.time * const.G
+        self._v0 = round(v0, Kit.DIGITS_AFTER_DOT)
         self.by_v0()
 
     def by_height(self):
         """Calculate all params by max height"""
-        self._v0 = round((2 * const.G * self.height) ** 0.5, Kit.DIGITS_AFTER_DOT)
+        v0 = (2 * const.G * self.height) ** 0.5
+        self._v0 = round(v0, Kit.DIGITS_AFTER_DOT)
         self.by_v0()
 
 
 class Horizontal(Kit):
-    def __init__(self, v0=None, t=None, h=None):
-        super().__init__(v0=v0, t=t, h=h)
+    """Class with parameters of horizontal throw"""
+
+    def __init__(self, v0=None, t=None, h=None, d=None):
+        super().__init__(v0=v0, t=t, h=h, d=d)
 
     def by_v0_and_time(self):
         """Calculate all params by initial speed and flight time"""
+        height = (const.G * self.time ** 2) / 2
+        self._height = round(height, Kit.DIGITS_AFTER_DOT)
+        distance = self.v0 * self.time
+        self._distance = round(distance, Kit.DIGITS_AFTER_DOT)
+
+    def by_v0_and_height(self):
+        """
+        Calculate all params by initial speed and height
+        from which the throw was made
+        """
+        time = ((2 * self.height) / const.G) ** 0.5
+        self._time = round(time, Kit.DIGITS_AFTER_DOT)
+        self.by_v0_and_time()
+
+    def by_v0_and_dist(self):
+        """Calculate all params by initial speed and flight distance"""
+        time = self.distance / self.v0
+        self._time = round(time, Kit.DIGITS_AFTER_DOT)
+        self.by_v0_and_time()
+
+
+class Alpha(Kit):
+    """Class with parameters of throw под углом к горизонту"""
+
+    def __init__(self, v0=None, a=None, t=None, h=None, d=None):
+        super().__init__(v0=v0, a=a, t=t, h=h, d=d)
+
+    def by_v0_and_alpha(self):
+        pass
+
+    def by_v0_and_time(self):
         pass
 
     def by_v0_and_height(self):
-        """Calculate all params by initial speed and height from which the throw was made"""
+        pass
+
+    def by_v0_and_distance(self):
         pass

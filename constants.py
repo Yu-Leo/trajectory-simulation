@@ -1,6 +1,7 @@
 # File with constants
 
-class TrowType:
+
+class ThrowType:
     VERTICAL = 0
     HORIZONTAL = 1
     ALPHA = 2
