@@ -25,6 +25,8 @@ modes = {
 number_only = "В данное поле необходимо ввести число."
 range_exceeding = "В данное поле можно ввести только положительное число."
 
+units = ["м/с", "рад", "с", "м"]
+
 
 def error_in_field(field):
     return f'Ошибка в поле "{field}".'

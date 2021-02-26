@@ -15,7 +15,7 @@ class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.parameters = WindowParams(title="Abandoned body's trajectory simulation",
-                                       width=740, height=475)
+                                       width=750, height=480)
         self.title(self.parameters.title)
         self.geometry(self.parameters.geometry())
         self.resizable(*self.parameters.resizable)

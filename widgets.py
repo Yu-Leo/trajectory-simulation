@@ -96,7 +96,7 @@ class ThrowType(tk.Frame):
     def __init__(self, window, change_func):
         super().__init__(window)
         self.__label = tk.Label(self, text=text.throw_type_title,
-                                font=(style.font_name, 12))
+                                font=style.Label.font)
         self.__menu = Combobox(self, values=text.throw_types,
                                state="readonly", width=22)
         self.__menu.current(config.throw_type)  # Default value
@@ -158,8 +158,8 @@ class ThrowParams(tk.Frame):
 
         self.__button = tk.Button(self,
                                   text=text.read_from_file,
-                                  font=(style.font_name, 10),
-                                  width=style.Btn.width,
+                                  font=(style.font_name, 11),
+                                  width=style.Btn.width + 1,
                                   bg=style.Btn.colors["read"],
                                   state=tk.DISABLED)
 
@@ -171,7 +171,7 @@ class ThrowParams(tk.Frame):
         self.__height.draw(3)
         if self.__distance is not None:
             self.__distance.draw(4)
-        self.__button.grid(column=0, row=5, columnspan=3, pady=(5, 0))
+        self.__button.grid(column=0, row=5, columnspan=4, pady=(5, 0))
         self.pack()
 
     def hide(self):
@@ -260,24 +260,40 @@ class ParamRow:
         """Change calculate mode"""
         config.calculate_mode = self.__row_ind
 
+    @staticmethod
+    def __get_units_of_measurement(row_ind):
+        """Return string with units of measurement"""
+        if row_ind == const.Modes.V0:
+            return text.units[0]
+        elif row_ind == const.Modes.ALPHA:
+            return text.units[1]
+        elif row_ind == const.Modes.TIME:
+            return text.units[2]
+        elif row_ind in (const.Modes.HEIGHT, const.Modes.DISTANCE):
+            return text.units[3]
+        else:
+            raise ValueError("Invalid value of row_ind")
+
     def __init__(self, window, row_ind, variable=None):
         self.__row_ind = row_ind
         self.__name = text.modes[self.__row_ind]
-        self._label = tk.Label(window, text=self.__name, font=(style.font_name, 12))
-        self._entry = tk.Entry(window, font=(style.font_name, 12), width=12)
-
+        self._label = tk.Label(window, text=self.__name, font=style.Label.font)
+        self._entry = tk.Entry(window, font=style.Label.font, width=12)
+        units = self.__get_units_of_measurement(self.__row_ind)
+        self._units_of_measurement = tk.Label(window, text=units,
+                                              font=style.Label.font)
         button = tk.Radiobutton(window,
                                 variable=variable,
                                 value=row_ind,
                                 command=self.__change_mode)
-
         self._button = (None if variable is None else button)
 
     def draw(self, row):
         self._label.grid(column=0, row=row, padx=(0, 5), pady=6)
         self._entry.grid(column=1, row=row, padx=(0, 5), pady=6)
+        self._units_of_measurement.grid(column=2, row=row, padx=(0, 5), pady=6)
         if self._button is not None:
-            self._button.grid(column=2, row=row, pady=(0, 6), padx=(5, 0))
+            self._button.grid(column=3, row=row, pady=(0, 6), padx=(5, 0))
 
     def hide(self):
         self._label.grid_remove()

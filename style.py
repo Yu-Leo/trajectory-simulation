@@ -13,3 +13,6 @@ class Btn:
         "enter": "#B8FFB5",
         "save": "#FFD4B5",
         "theory": "#B5DCFF"}
+
+class Label:
+    font = (font_name, 12)
