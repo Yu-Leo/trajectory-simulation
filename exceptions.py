@@ -3,6 +3,7 @@
 TYPE_ERROR = 0
 RANGE_ERROR = 1
 WARNING = 2
+ALPHA_RANGE_ERROR = 3
 
 
 class EntryContentError(ValueError):

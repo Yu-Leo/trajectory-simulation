@@ -24,6 +24,7 @@ modes = {
 
 number_only = "В данное поле необходимо ввести число."
 range_exceeding = "В данное поле можно ввести только положительное число."
+alpha_range_error = "Значение угла броска не может быть больше 90 град (pi / 2 рад.)"
 
 units = ["м/с", "рад", "с", "м"]
 
@@ -32,7 +33,7 @@ impossible = "Бросок с данными параметрами невозм
 
 
 def error_in_field(field):
-    return f'Ошибка в поле "{field}".'
+    return f'Некорректное значение в поле "{field}".'
 
 
 class ExceptionTexts:

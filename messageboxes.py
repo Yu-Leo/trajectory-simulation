@@ -3,7 +3,7 @@
 import tkinter.messagebox as mb
 
 import exceptions as exc
-from text import exception_text
+import text
 
 
 class ErrorMb:
@@ -22,10 +22,13 @@ class ExceptionMb(ErrorMb):
 
     def __init__(self, exception):
         if exception.exception_type == exc.TYPE_ERROR:
-            ErrorMb.__init__(self, title=exception_text(exception.field).title,
-                             message=exception_text(exception.field).type_error)
+            ErrorMb.__init__(self, title=text.exception_text(exception.field).title,
+                             message=text.exception_text(exception.field).type_error)
         elif exception.exception_type == exc.RANGE_ERROR:
-            ErrorMb.__init__(self, title=exception_text(exception.field).title,
-                             message=exception_text(exception.field).range_error)
+            ErrorMb.__init__(self, title=text.exception_text(exception.field).title,
+                             message=text.exception_text(exception.field).range_error)
+        elif exception.exception_type == exc.ALPHA_RANGE_ERROR:
+            ErrorMb.__init__(self, title=text.exception_text(exception.field).title,
+                             message=text.alpha_range_error)
         else:
             raise ValueError("Exception type error")

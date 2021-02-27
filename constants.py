@@ -1,5 +1,6 @@
 # File with constants
 
+from math import pi
 
 class ThrowType:
     VERTICAL = 0
@@ -20,3 +21,5 @@ class Modes:
 
 
 G = 9.8  # Gravitational acceleration
+
+MAX_ALPHA = pi / 2
