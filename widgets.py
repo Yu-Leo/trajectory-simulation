@@ -143,6 +143,8 @@ class ThrowParams(tk.Frame):
         else:
             var_for_v0 = self.__calculate_mode
 
+        var_for_distance = self.__calculate_mode if throw_type == const.ThrowType.HORIZONTAL else None
+
         self.__v0 = ParamRow(self, const.Modes.V0,
                              variable=var_for_v0)
         need_alpha = throw_type == const.ThrowType.ALPHA
@@ -154,7 +156,7 @@ class ThrowParams(tk.Frame):
         self.__height = ParamRow(self, const.Modes.HEIGHT,
                                  variable=self.__calculate_mode)
         self.__distance = ParamRow(self, const.Modes.DISTANCE,
-                                   variable=self.__calculate_mode) if need_distance else None
+                                   variable=var_for_distance) if need_distance else None
 
         self.__button = tk.Button(self,
                                   text=text.read_from_file,

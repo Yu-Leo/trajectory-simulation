@@ -27,6 +27,9 @@ range_exceeding = "В данное поле можно ввести только
 
 units = ["м/с", "рад", "с", "м"]
 
+incorrect = "Некорректные данные"
+impossible = "Бросок с данными параметрами невозможен"
+
 
 def error_in_field(field):
     return f'Ошибка в поле "{field}".'
