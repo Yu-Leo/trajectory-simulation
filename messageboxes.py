@@ -6,15 +6,32 @@ import exceptions as exc
 import text
 
 
-class ErrorMb:
+class Mb:
     """Messagebox with Error-type"""
 
     def __init__(self, title, message):
         self.title = title
         self.message = message
 
+
+class ErrorMb(Mb):
+    """Error-type messagebox"""
+
+    def __init__(self, title, message):
+        super().__init__(title, message)
+
     def show(self):
         mb.showerror(self.title, self.message)
+
+
+class InfoMb(Mb):
+    """Info-type messagebox"""
+
+    def __init__(self, title, message):
+        super().__init__(title, message)
+
+    def show(self):
+        mb.showinfo(self.title, self.message)
 
 
 class ExceptionMb(ErrorMb):

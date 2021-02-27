@@ -3,6 +3,7 @@
 import constants as const
 
 throw_type_title = "Тип броска"
+
 throw_types = ("Вертикально",
                "Горизонтально",
                "Под углом к горизонту")
@@ -38,6 +39,10 @@ params = ["Начальная скорость броска",
           "Максимальная высота",
           "Дальность"]
 
+saved_successfully = {
+    "title": "Сохранено",
+    "message": f"Параметры успешно сохранены в файл {const.RESULTS_FILE_NAME}"
+}
 
 def error_in_field(field):
     return f'Некорректное значение в поле "{field}".'
