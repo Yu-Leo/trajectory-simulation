@@ -161,7 +161,7 @@ class ThrowParams(tk.Frame):
         self.__button = tk.Button(self,
                                   text=text.read_from_file,
                                   font=(style.font_name, 11),
-                                  width=style.Btn.width + 1,
+                                  width=style.Btn.width - 3,
                                   bg=style.Btn.colors["read"],
                                   state=tk.DISABLED)
 
@@ -173,7 +173,7 @@ class ThrowParams(tk.Frame):
         self.__height.draw(3)
         if self.__distance is not None:
             self.__distance.draw(4)
-        self.__button.grid(column=0, row=5, columnspan=4, pady=(5, 0))
+        self.__button.grid(column=1, row=5, columnspan=2, pady=(5, 0), ipadx=3)
         self.pack()
 
     def hide(self):
