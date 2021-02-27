@@ -1,12 +1,12 @@
 # File with widget's classes
 
 import tkinter as tk
-import webbrowser
 from tkinter.ttk import Combobox
 
 import config
 import constants as const
 import exceptions as exc
+import operations
 import style
 import text
 from messageboxes import ExceptionMb
@@ -60,7 +60,7 @@ class Menu(tk.Frame):
         self.__buttons = Buttons(self,
                                  clear_func=self.clear,
                                  enter_func=self.enter,
-                                 theory_func=self.theory)
+                                 theory_func=operations.open_theory)
 
     def draw(self):
         self.__throw_type.draw()
@@ -96,18 +96,6 @@ class Menu(tk.Frame):
     def clear(self):
         self.__throw_params.clear_entries()
 
-    @staticmethod
-    def theory():
-        """Open web-page with theory"""
-        if config.throw_type == const.ThrowType.VERTICAL:
-            url = const.Theory.url_vertical
-        elif config.throw_type == const.ThrowType.HORIZONTAL:
-            url = const.Theory.url_horizontal
-        elif config.throw_type == const.ThrowType.ALPHA:
-            url = const.Theory.url_alpha
-        else:
-            raise ValueError("Open theory. Incorrect value in config.throw_type")
-        webbrowser.open_new(url)
 
 
 class ThrowType(tk.Frame):
