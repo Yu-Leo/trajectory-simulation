@@ -1,6 +1,7 @@
 # File with widget's classes
 
 import tkinter as tk
+from tkinter import filedialog
 from tkinter.ttk import Combobox
 
 import config
@@ -100,9 +101,15 @@ class Menu(tk.Frame):
 
     def save(self):
         """Operations, which will run after click on save-button"""
-        operations.save_parameters()
-        InfoMb(title=text.saved_successfully["title"],
-               message=text.saved_successfully["message"]).show()
+        options = {}
+        options['filetypes'] = [('All files', '.*'), ('json files', '.json')]
+        options['initialfile'] = const.RESULTS_FILE_NAME
+        options['parent'] = self
+        filename = filedialog.asksaveasfilename(**options)
+        if filename:
+            operations.save_parameters(filename)
+            InfoMb(title=text.saved_successfully["title"],
+                   message=text.saved_successfully["message"]).show()
 
 
 class ThrowType(tk.Frame):

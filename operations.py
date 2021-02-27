@@ -38,9 +38,9 @@ def generate_data():
     return data
 
 
-def save_parameters():
+def save_parameters(filename):
     """Save parameters to file in .json format"""
-    with open(const.RESULTS_FILE_NAME, "w", encoding="utf-8") as file:
+    with open(filename, "w", encoding="utf-8") as file:
         data = generate_data()
         params_string = json.dumps(data,
                                    ensure_ascii=False,
