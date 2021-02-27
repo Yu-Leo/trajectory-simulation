@@ -171,7 +171,10 @@ class Alpha(Kit):
 
     def by_v0_and_time(self):
         """Calculate all params by initial speed and flight time"""
-        alpha = asin((const.G * self.time / (2 * self.v0)))
+        sin_a = (const.G * self.time / (2 * self.v0))
+        if not (-1 <= sin_a <= 1):
+            raise exc.Unreal()
+        alpha = asin(sin_a)
         self._alpha = round(alpha, Kit.DIGITS_AFTER_DOT)
         self.by_v0_and_alpha()
 
@@ -179,7 +182,7 @@ class Alpha(Kit):
         """Calculate all params by initial speed and max height of throw"""
         sin_a = (2 * const.G * self.height / (self.v0 ** 2)) ** 0.5
         if not (-1 <= sin_a <= 1):
-            raise exc.Unreal
+            raise exc.Unreal()
         alpha = asin(sin_a)
         self._alpha = round(alpha, Kit.DIGITS_AFTER_DOT)
         self.by_v0_and_alpha()
