@@ -1,15 +1,16 @@
 # File with widget's classes
 
 import tkinter as tk
-import webbrowser
+from tkinter import filedialog
 from tkinter.ttk import Combobox
 
 import config
 import constants as const
 import exceptions as exc
+import operations
 import style
 import text
-from messageboxes import ExceptionMb
+from messageboxes import ExceptionMb, InfoMb
 from windowsParameters import DrawingFieldParams, SizeParams
 
 
@@ -60,7 +61,8 @@ class Menu(tk.Frame):
         self.__buttons = Buttons(self,
                                  clear_func=self.clear,
                                  enter_func=self.enter,
-                                 theory_func=self.theory)
+                                 save_func=self.save,
+                                 theory_func=operations.open_theory)
 
     def draw(self):
         self.__throw_type.draw()
@@ -94,20 +96,20 @@ class Menu(tk.Frame):
         self.__throw_params.update_entries()
 
     def clear(self):
+        """Operations, which will run after click on clear-button"""
         self.__throw_params.clear_entries()
 
-    @staticmethod
-    def theory():
-        """Open web-page with theory"""
-        if config.throw_type == const.ThrowType.VERTICAL:
-            url = const.Theory.url_vertical
-        elif config.throw_type == const.ThrowType.HORIZONTAL:
-            url = const.Theory.url_horizontal
-        elif config.throw_type == const.ThrowType.ALPHA:
-            url = const.Theory.url_alpha
-        else:
-            raise ValueError("Open theory. Incorrect value in config.throw_type")
-        webbrowser.open_new(url)
+    def save(self):
+        """Operations, which will run after click on save-button"""
+        options = {}
+        options['filetypes'] = [('All files', '.*'), ('json files', '.json')]
+        options['initialfile'] = const.RESULTS_FILE_NAME
+        options['parent'] = self
+        filename = filedialog.asksaveasfilename(**options)
+        if filename:
+            operations.save_parameters(filename)
+            InfoMb(title=text.saved_successfully["title"],
+                   message=text.saved_successfully["message"]).show()
 
 
 class ThrowType(tk.Frame):
@@ -242,7 +244,7 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window, clear_func, enter_func, theory_func):
+    def __init__(self, window, clear_func, enter_func, save_func, theory_func):
         super().__init__(window)
         self.__clear_button = tk.Button(self,
                                         text=text.clear,
@@ -261,7 +263,7 @@ class Buttons(tk.Frame):
                                        font=style.Btn.font,
                                        width=style.Btn.width,
                                        bg=style.Btn.colors["save"],
-                                       state=tk.DISABLED)
+                                       command=save_func)
         self.__theory_button = tk.Button(self,
                                          text=text.theory,
                                          font=style.Btn.font,

@@ -30,3 +30,6 @@ class Theory:
     url_vertical = "http://ru.solverbook.com/spravochnik/mexanika/kinematika/uskorenie-svobodnogo-padeniya/"
     url_horizontal = "http://ru.solverbook.com/spravochnik/mexanika/kinematika/dvizhenie-tela-broshennogo-gorizontalno/"
     url_alpha = "http://ru.solverbook.com/spravochnik/mexanika/kinematika/dvizhenie-tela-broshennogo-pod-uglom-k-gorizontu/"
+
+
+RESULTS_FILE_NAME = "results.json"
