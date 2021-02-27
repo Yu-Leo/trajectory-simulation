@@ -1,6 +1,7 @@
 # File with widget's classes
 
 import tkinter as tk
+import webbrowser
 from tkinter.ttk import Combobox
 
 import config
@@ -58,7 +59,8 @@ class Menu(tk.Frame):
         self.__throw_params = ThrowParams(self, config.throw_type)
         self.__buttons = Buttons(self,
                                  clear_func=self.clear,
-                                 enter_func=self.enter)
+                                 enter_func=self.enter,
+                                 theory_func=self.theory)
 
     def draw(self):
         self.__throw_type.draw()
@@ -93,6 +95,20 @@ class Menu(tk.Frame):
 
     def clear(self):
         self.__throw_params.clear_entries()
+
+    @staticmethod
+    def theory():
+        """Open web-page with theory"""
+        if config.throw_type == const.ThrowType.VERTICAL:
+            url = const.Theory.url_vertical
+        elif config.throw_type == const.ThrowType.HORIZONTAL:
+            url = const.Theory.url_horizontal
+        elif config.throw_type == const.ThrowType.ALPHA:
+            url = const.Theory.url_alpha
+        else:
+            raise ValueError("Open theory. Incorrect value in config.throw_type")
+        webbrowser.open_new(url)
+
 
 class ThrowType(tk.Frame):
     """Class of widget, which chose the throw type"""
@@ -226,7 +242,7 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window, clear_func, enter_func):
+    def __init__(self, window, clear_func, enter_func, theory_func):
         super().__init__(window)
         self.__clear_button = tk.Button(self,
                                         text=text.clear,
@@ -251,7 +267,7 @@ class Buttons(tk.Frame):
                                          font=style.Btn.font,
                                          width=style.Btn.width,
                                          bg=style.Btn.colors["theory"],
-                                         state=tk.DISABLED)
+                                         command=theory_func)
 
     def draw(self):
         self.__clear_button.pack(pady=5)
