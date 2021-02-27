@@ -2,6 +2,9 @@
 
 import config
 import constants as const
+import exceptions as exc
+import text
+from messageboxes import ErrorMb
 from paramsKits import Vertical, Horizontal, Alpha
 
 
@@ -58,27 +61,25 @@ def alpha_mode():
         kit = Alpha(v0=v0, a=alpha)
         kit.by_v0_and_alpha()
         config.kit.set_params(config.throw_type, config.calculate_mode, kit)
-
     elif config.calculate_mode == const.Modes.TIME:
         v0 = config.kit.v0
         time = config.kit.time
         kit = Alpha(v0=v0, t=time)
-        kit.by_v0_and_time()
-        config.kit.set_params(config.throw_type, config.calculate_mode, kit)
-
+        try:
+            kit.by_v0_and_time()
+        except exc.Unreal:
+            ErrorMb(title=text.incorrect, message=text.impossible).show()
+        else:
+            config.kit.set_params(config.throw_type, config.calculate_mode, kit)
     elif config.calculate_mode == const.Modes.HEIGHT:
         v0 = config.kit.v0
         height = config.kit.height
         kit = Alpha(v0=v0, h=height)
-        kit.by_v0_and_height()
-        config.kit.set_params(config.throw_type, config.calculate_mode, kit)
-
-    elif config.calculate_mode == const.Modes.DISTANCE:
-        v0 = config.kit.v0
-        distance = config.kit.distance
-        kit = Alpha(v0=v0, d=distance)
-        kit.by_v0_and_distance()
-        config.kit.set_params(config.throw_type, config.calculate_mode, kit)
-
+        try:
+            kit.by_v0_and_height()
+        except exc.Unreal:
+            ErrorMb(title=text.incorrect, message=text.impossible).show()
+        else:
+            config.kit.set_params(config.throw_type, config.calculate_mode, kit)
     else:
         raise ValueError("Alpha, invalid value of config.calculate_mode")

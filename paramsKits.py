@@ -1,5 +1,7 @@
 # File with classes of numbers kit in different throw-types
 
+from math import sin, cos, asin
+
 import constants as const
 import exceptions as exc
 
@@ -15,7 +17,8 @@ class Kit:
             return None
         if isinstance(value, str):
             if value == "":
-                if (throw_type == const.ThrowType.HORIZONTAL and
+                # Initial speed is required for calculations in horizontal and alpha modes
+                if (throw_type and (const.ThrowType.HORIZONTAL, const.Modes.ALPHA) and
                         field_ind == const.Modes.V0):
                     raise exc.EntryContentError(field=field_ind,
                                                 exception_type=exc.TYPE_ERROR)
@@ -156,13 +159,30 @@ class Alpha(Kit):
         super().__init__(v0=v0, a=a, t=t, h=h, d=d)
 
     def by_v0_and_alpha(self):
-        pass
+        """Calculate all params by initial speed and throw angle"""
+        full_time = (2 * self.v0 * sin(self.alpha)) / const.G
+        lifting_time = full_time / 2
+        distance = self.v0 * cos(self.alpha) * full_time
+        height = (self.v0 * sin(self.alpha) * lifting_time -
+                  (const.G * lifting_time ** 2) / 2)
+        self._time = round(full_time, Kit.DIGITS_AFTER_DOT)
+        self._height = round(height, Kit.DIGITS_AFTER_DOT)
+        self._distance = round(distance, Kit.DIGITS_AFTER_DOT)
 
     def by_v0_and_time(self):
-        pass
+        """Calculate all params by initial speed and flight time"""
+        sin_a = (const.G * self.time / (2 * self.v0))
+        if not (-1 <= sin_a <= 1):
+            raise exc.Unreal()
+        alpha = asin(sin_a)
+        self._alpha = round(alpha, Kit.DIGITS_AFTER_DOT)
+        self.by_v0_and_alpha()
 
     def by_v0_and_height(self):
-        pass
-
-    def by_v0_and_distance(self):
-        pass
+        """Calculate all params by initial speed and max height of throw"""
+        sin_a = (2 * const.G * self.height / (self.v0 ** 2)) ** 0.5
+        if not (-1 <= sin_a <= 1):
+            raise exc.Unreal()
+        alpha = asin(sin_a)
+        self._alpha = round(alpha, Kit.DIGITS_AFTER_DOT)
+        self.by_v0_and_alpha()

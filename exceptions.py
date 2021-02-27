@@ -15,3 +15,8 @@ class EntryContentError(ValueError):
 
     def __str__(self):
         return repr(f"Field index: {self.field}")
+
+
+class Unreal(ValueError):
+    """Throw with these parameters is unreal"""
+    pass
