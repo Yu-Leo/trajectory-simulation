@@ -60,6 +60,7 @@ class Menu(tk.Frame):
         self.__buttons = Buttons(self,
                                  clear_func=self.clear,
                                  enter_func=self.enter,
+                                 save_func=self.save,
                                  theory_func=operations.open_theory)
 
     def draw(self):
@@ -236,7 +237,7 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window, clear_func, enter_func, theory_func):
+    def __init__(self, window, clear_func, enter_func, save_func, theory_func):
         super().__init__(window)
         self.__clear_button = tk.Button(self,
                                         text=text.clear,
@@ -255,7 +256,7 @@ class Buttons(tk.Frame):
                                        font=style.Btn.font,
                                        width=style.Btn.width,
                                        bg=style.Btn.colors["save"],
-                                       state=tk.DISABLED)
+                                       command=save_func)
         self.__theory_button = tk.Button(self,
                                          text=text.theory,
                                          font=style.Btn.font,
