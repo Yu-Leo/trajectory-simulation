@@ -98,7 +98,9 @@ class ThrowType(tk.Frame):
         self.__label = tk.Label(self, text=text.throw_type_title,
                                 font=style.Label.font)
         self.__menu = Combobox(self, values=text.throw_types,
-                               state="readonly", width=22)
+                               state="readonly",
+                               width=20,
+                               font=(style.font_name, 10))
         self.__menu.current(config.throw_type)  # Default value
         self.__menu.bind("<<ComboboxSelected>>",
                          lambda event: change_func(self.__menu.current()))
