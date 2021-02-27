@@ -56,7 +56,9 @@ class Menu(tk.Frame):
         self.__throw_type = ThrowType(self,
                                       change_func=self.change_throw_params_list)
         self.__throw_params = ThrowParams(self, config.throw_type)
-        self.__buttons = Buttons(self, self.enter)
+        self.__buttons = Buttons(self,
+                                 clear_func=self.clear,
+                                 enter_func=self.enter)
 
     def draw(self):
         self.__throw_type.draw()
@@ -89,6 +91,8 @@ class Menu(tk.Frame):
         calc_func()
         self.__throw_params.update_entries()
 
+    def clear(self):
+        self.__throw_params.clear_entries()
 
 class ThrowType(tk.Frame):
     """Class of widget, which chose the throw type"""
@@ -138,7 +142,7 @@ class ThrowParams(tk.Frame):
         super().__init__(window)
 
         def_val = config.calculate_mode
-        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
+        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobutton's values controller
 
         if throw_type in (const.ThrowType.HORIZONTAL, const.ThrowType.ALPHA):
             var_for_v0 = None
@@ -222,20 +226,20 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window, enter):
+    def __init__(self, window, clear_func, enter_func):
         super().__init__(window)
         self.__clear_button = tk.Button(self,
                                         text=text.clear,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
                                         bg=style.Btn.colors["clear"],
-                                        state=tk.DISABLED)
+                                        command=clear_func)
         self.__enter_button = tk.Button(self,
                                         text=text.calculate,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
                                         bg=style.Btn.colors["enter"],
-                                        command=enter)
+                                        command=enter_func)
         self.__save_button = tk.Button(self,
                                        text=text.save,
                                        font=style.Btn.font,
