@@ -44,6 +44,9 @@ saved_successfully = {
     "message": f"Параметры успешно сохранены в файл {const.RESULTS_FILE_NAME}"
 }
 
+demonstration = "Визуализация\n\nтраектории движения"
+
+
 def error_in_field(field):
     return f'Некорректное значение в поле "{field}".'
 

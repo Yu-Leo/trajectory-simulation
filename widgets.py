@@ -18,9 +18,12 @@ class DrawingField(tk.Canvas):
     """Field for simulation"""
 
     def __init__(self, window):
+        self.__size_x = 500
+        self.__size_y = window.parameters.height
+
         self.__parameters = DrawingFieldParams(bg="white",
-                                               width=500,
-                                               height=window.parameters.height,
+                                               width=self.__size_x,
+                                               height=self.__size_y,
                                                padx=10,
                                                pady=10)
         super().__init__(window, bg=self.__parameters.bg,
@@ -32,8 +35,20 @@ class DrawingField(tk.Canvas):
                   padx=self.__parameters.padx,
                   pady=self.__parameters.pady)
 
+        self.draw_info_text()
+
+    def draw_info_text(self):
+        """Drawing text with info about this field"""
+        self.create_text(self.__size_x // 2, self.__size_y // 2,
+                         text=text.demonstration,
+                         justify=tk.CENTER,
+                         font=(style.font_name, 18),
+                         fill="gray70")
+
 
 def exceptions_tracker(func):
+    """Track my exceptions and show messagebox with info about type of error"""
+
     def wrapper(*args):
         try:
             func(*args)
