@@ -116,7 +116,7 @@ class Menu(tk.Frame):
 
     def save(self):
         """Operations, which will run after click on save-button"""
-        options = {}
+        options = dict()
         options['filetypes'] = [('All files', '.*'), ('json files', '.json')]
         options['initialfile'] = const.RESULTS_FILE_NAME
         options['parent'] = self

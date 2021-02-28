@@ -23,7 +23,7 @@ def open_theory():
 
 def generate_data():
     """Generate dictionary with parameters of throw by config file"""
-    data = {}  # Dictionary with parameters of throw
+    data = dict()  # Dictionary with parameters of throw
 
     data[text.throw_type_title] = text.throw_types[config.throw_type]  # Throw type
 
