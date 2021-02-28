@@ -1,14 +1,16 @@
 # File with widget's classes
 
 import tkinter as tk
+from tkinter import filedialog
 from tkinter.ttk import Combobox
 
 import config
 import constants as const
 import exceptions as exc
+import operations
 import style
 import text
-from messageboxes import ExceptionMb
+from messageboxes import ExceptionMb, InfoMb
 from windowsParameters import DrawingFieldParams, SizeParams
 
 
@@ -16,9 +18,12 @@ class DrawingField(tk.Canvas):
     """Field for simulation"""
 
     def __init__(self, window):
+        self.__size_x = 500
+        self.__size_y = window.parameters.height
+
         self.__parameters = DrawingFieldParams(bg="white",
-                                               width=500,
-                                               height=window.parameters.height,
+                                               width=self.__size_x,
+                                               height=self.__size_y,
                                                padx=10,
                                                pady=10)
         super().__init__(window, bg=self.__parameters.bg,
@@ -30,8 +35,20 @@ class DrawingField(tk.Canvas):
                   padx=self.__parameters.padx,
                   pady=self.__parameters.pady)
 
+        self.draw_info_text()
+
+    def draw_info_text(self):
+        """Drawing text with info about this field"""
+        self.create_text(self.__size_x // 2, self.__size_y // 2,
+                         text=text.demonstration,
+                         justify=tk.CENTER,
+                         font=(style.font_name, 18),
+                         fill="gray70")
+
 
 def exceptions_tracker(func):
+    """Track my exceptions and show messagebox with info about type of error"""
+
     def wrapper(*args):
         try:
             func(*args)
@@ -56,7 +73,11 @@ class Menu(tk.Frame):
         self.__throw_type = ThrowType(self,
                                       change_func=self.change_throw_params_list)
         self.__throw_params = ThrowParams(self, config.throw_type)
-        self.__buttons = Buttons(self, self.enter)
+        self.__buttons = Buttons(self,
+                                 clear_func=self.clear,
+                                 enter_func=self.enter,
+                                 save_func=self.save,
+                                 theory_func=operations.open_theory)
 
     def draw(self):
         self.__throw_type.draw()
@@ -88,6 +109,22 @@ class Menu(tk.Frame):
         self.__throw_params.update_config_kit()
         calc_func()
         self.__throw_params.update_entries()
+
+    def clear(self):
+        """Operations, which will run after click on clear-button"""
+        self.__throw_params.clear_entries()
+
+    def save(self):
+        """Operations, which will run after click on save-button"""
+        options = dict()
+        options['filetypes'] = [('All files', '.*'), ('json files', '.json')]
+        options['initialfile'] = const.RESULTS_FILE_NAME
+        options['parent'] = self
+        filename = filedialog.asksaveasfilename(**options)
+        if filename:
+            operations.save_parameters(filename)
+            InfoMb(title=text.saved_successfully["title"],
+                   message=text.saved_successfully["message"]).show()
 
 
 class ThrowType(tk.Frame):
@@ -137,8 +174,9 @@ class ThrowParams(tk.Frame):
     def __init__(self, window, throw_type):
         super().__init__(window)
 
-        def_val = config.calculate_mode
-        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobuttons values controller
+        def_val = const.Modes.DEFAULT
+        config.calculate_mode = const.Modes.DEFAULT
+        self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobutton's values controller
 
         if throw_type in (const.ThrowType.HORIZONTAL, const.ThrowType.ALPHA):
             var_for_v0 = None
@@ -222,32 +260,32 @@ class ThrowParams(tk.Frame):
 class Buttons(tk.Frame):
     """Class of buttons for interaction with app"""
 
-    def __init__(self, window, enter):
+    def __init__(self, window, clear_func, enter_func, save_func, theory_func):
         super().__init__(window)
         self.__clear_button = tk.Button(self,
                                         text=text.clear,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
                                         bg=style.Btn.colors["clear"],
-                                        state=tk.DISABLED)
+                                        command=clear_func)
         self.__enter_button = tk.Button(self,
                                         text=text.calculate,
                                         font=style.Btn.font,
                                         width=style.Btn.width,
                                         bg=style.Btn.colors["enter"],
-                                        command=enter)
+                                        command=enter_func)
         self.__save_button = tk.Button(self,
                                        text=text.save,
                                        font=style.Btn.font,
                                        width=style.Btn.width,
                                        bg=style.Btn.colors["save"],
-                                       state=tk.DISABLED)
+                                       command=save_func)
         self.__theory_button = tk.Button(self,
                                          text=text.theory,
                                          font=style.Btn.font,
                                          width=style.Btn.width,
                                          bg=style.Btn.colors["theory"],
-                                         state=tk.DISABLED)
+                                         command=theory_func)
 
     def draw(self):
         self.__clear_button.pack(pady=5)
