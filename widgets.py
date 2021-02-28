@@ -159,7 +159,8 @@ class ThrowParams(tk.Frame):
     def __init__(self, window, throw_type):
         super().__init__(window)
 
-        def_val = config.calculate_mode
+        def_val = const.Modes.DEFAULT
+        config.calculate_mode = const.Modes.DEFAULT
         self.__calculate_mode = tk.IntVar(value=def_val)  # Radiobutton's values controller
 
         if throw_type in (const.ThrowType.HORIZONTAL, const.ThrowType.ALPHA):
